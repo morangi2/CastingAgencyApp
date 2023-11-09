@@ -10,7 +10,7 @@ app = Flask(__name__) #in app.py = OK
 moment = Moment(app) # NOWHERE, for formatting dates and times
 app.config.from_object('config') #in models.py = OK
 db = SQLAlchemy(app) #in models.py = OK
-#migrate = Migrate(app, db) #in manage.py + manager == OK
+migrate = Migrate(app, db) #in manage.py + manager == OK
 
 class Venue(db.Model):
     __tablename__ = 'venues'
