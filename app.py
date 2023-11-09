@@ -48,7 +48,7 @@ app.jinja_env.filters['datetime'] = format_datetime
 def index():
   excited = os.environ['EXCITED']
   if excited == 'true':
-    print("**********EXCITED is true!!********")
+    print("***EXCITED is true!!********")
     print(os.environ['DATABASE_URL'])
   return render_template('pages/home.html')
 
