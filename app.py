@@ -54,6 +54,7 @@ def index():
 
 #  ----------------------------------------------------------------
 #  ACTORS
+#   -get all, get by ID, post new, patch by ID, delete one
 #  ----------------------------------------------------------------
 
 @app.route('/actors')
@@ -273,6 +274,7 @@ def delete_actor(actor_id):
     db.session.rollback()
   finally:
     db.session.close()
+    flash('Actor successfully deleted!')
   if error:
     error = False
     flash('An error occured. Venue not deleted.')
@@ -284,23 +286,6 @@ def delete_actor(actor_id):
 #  Venues
 #  ----------------------------------------------------------------
 
-@app.route('/venues')
-def venues():
-  # TODO: replace with real venues data. == DONE
-  #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue. == DONE
-
-  cities_list = Venue.query.distinct('city')
-  areas = []
-
-  for one_city in cities_list:
-    city_data = {}
-    city_data['city'] = one_city.city
-    city_data['state'] = one_city.state
-    city_data['venues'] = Venue.query.filter_by(city = one_city.city)
-    city_data['num_upcoming_shows'] = Show.query.filter_by(venue_id = one_city.id).count()
-    areas.append(city_data)
-
-  return render_template('pages/venues.html', areas=areas)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
@@ -348,161 +333,6 @@ def search_venues():
 
   return render_template('pages/search_venues.html', results=search_response, search_term=search_term)
 
-
-@app.route('/venues/<int:venue_id>')
-def show_venue(venue_id):
-  # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id == DONE
-
-  error = False
-
-  try:
-    venue_selected_data = {}
-    venue_selected = Venue.query.get(venue_id)
-    shows_joinedwith_artists = Show.query.filter_by(venue_id = venue_id).join(Artist).all()
-
-    venue_selected_data['id'] = venue_selected.id
-    venue_selected_data['name'] = venue_selected.name
-    venue_selected_data['genres'] = venue_selected.genres
-    venue_selected_data['address'] = venue_selected.address
-    venue_selected_data['city'] = venue_selected.city
-    venue_selected_data['state'] = venue_selected.state
-    venue_selected_data['phone'] = venue_selected.phone
-    venue_selected_data['website'] = venue_selected.website_link
-    venue_selected_data['facebook_link'] = venue_selected.facebook_link
-    venue_selected_data['seeking_talent'] = venue_selected.seeking_talent
-    venue_selected_data['seeking_description'] = venue_selected.seeking_description
-    venue_selected_data['image_link'] = venue_selected.image_link
-    venue_selected_data['past_shows'] = []
-    venue_selected_data['upcoming_shows'] = []
-    venue_selected_data['past_shows_count'] = 0
-    venue_selected_data['upcoming_shows_count'] = 0
-
-    #traverse the Show+Artist data to retrieve the artist details from past shows and upcoming shows
-    for show in shows_joinedwith_artists:
-      this_show = {}
-      this_show['artist_id'] = show.artist_id
-      this_show['artist_name'] = show.artist.name
-      this_show['artist_image_link'] = show.artist.image_link
-      this_show['start_time'] = show.start_time
-
-      #get current timestamp and convert timestamp from db, then compare to populate past shows and upcoming shows
-      show_start_time = show.start_time
-      show_start_time_formatted = datetime.strptime(show_start_time, '%Y-%m-%d %H:%M:%S')
-      db_timestamp = datetime.timestamp(show_start_time_formatted)
-      current_timestamp = time.time()
-
-      if current_timestamp > db_timestamp:
-        venue_selected_data['past_shows'].append(this_show)
-        venue_selected_data['past_shows_count'] += 1
-      else:
-        venue_selected_data['upcoming_shows'].append(this_show)
-        venue_selected_data['upcoming_shows_count'] += 1
-  except:
-    error = True
-    print(sys.exc_info())
-  if error:
-    error = False
-    flash('This venue does NOT exist in our records.')
-    abort(404)
-  
-  return render_template('pages/show_venue.html', venue=venue_selected_data)
-
-#  Create Venue
-#  ----------------------------------------------------------------
-
-@app.route('/venues/create', methods=['GET'])
-def create_venue_form():
-  form = VenueForm()
-  return render_template('forms/new_venue.html', form=form)
-
-@app.route('/venues/create', methods=['POST'])
-def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead == DONE
-  error = False
-  venueName = ''
-  data = {}
-
-  try:
-    #leverage the WTForm wrappers
-    form = VenueForm(request.form)
-
-    venue = Venue(name = form.name.data,
-                  city = form.city.data,
-                  state = form.state.data,
-                  address = form.address.data,
-                  phone = form.phone.data,
-                  genres = form.genres.data,
-                  image_link = form.image_link.data,
-                  facebook_link = form.facebook_link.data,
-                  website_link = form.website_link.data,
-                  seeking_talent = form.seeking_talent.data,
-                  seeking_description = form.seeking_description.data)
-    db.session.add(venue)
-    db.session.commit()
-
-    venueName = form.name.data
-
-    data['id'] = venue.id
-    data['name'] = venue.name
-    data['city'] = venue.city
-    data['state'] = venue.state
-    data['address'] = venue.address
-    data['phone'] = venue.phone
-    data['genres'] = venue.genres
-    data['image_link'] = venue.image_link
-    data['facebook_link'] = venue.facebook_link
-    data['website_link'] = venue.website_link
-    data['seeking_talent'] = venue.seeking_talent
-    data['seeking_description'] = venue.seeking_description
-  except:
-    error=True
-    db.session.rollback()
-    print(sys.exc_info())
-  finally:
-    db.session.close()
-  if error:
-    error = False
-    print('data to input:: ')
-    print(data)
-    print(sys.exc_info())
-    # TODO: on unsuccessful db insert, flash an error instead. == DONE
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    flash('An error occurred. Venue ' + venueName + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  else:
-    # on successful db insert, flash success
-    print(data)
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-
-  # TODO: modify data to be the data object returned from db insertion == DONE
-  return render_template('pages/home.html', venues=data)
-
-
-@app.route('/venues/<venue_id>/delete', methods=['GET'])
-def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using == DONE
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that == DONE
-  # clicking that button delete it from the db then redirect the user to the homepage
-
-  error = False
-  
-  try:
-    Venue.query.filter_by(id = venue_id).delete()
-    db.session.commit()
-  except:
-    error = True
-    db.session.rollback()
-  finally:
-    db.session.close()
-    flash('Venue successfully deleted!')
-  if error:
-    error = False
-    flash('An error occured. Venue could NOT be deleted.')
-    abort(404)
- 
-  return redirect(url_for('index'))
 
 
 #  Artists
