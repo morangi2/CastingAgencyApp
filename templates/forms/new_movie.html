@@ -1,0 +1,47 @@
+{% extends 'layouts/main.html' %}
+{% block title %}New Movie{% endblock %}
+{% block content %}
+  <div class="form-wrapper">
+    <form method="post" class="form" >
+      <h3 class="form-heading">List a new movie</h3>
+      <div class="form-group">
+        <label for="name">Title</label>
+        {{ form.title(class_ = 'form-control', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label for="release-date">Release Date</label>
+          {{ form.release_date(class_ = 'form-control', placeholder='YYYY-MM-DD HH:MM', autofocus = true) }}
+        </div>
+      <div class="form-group">
+        <label for="genres">Genre</label>
+        <small>Ctrl+Click to select multiple</small>
+        {{ form.genre(class_ = 'form-control', placeholder='Genres, separated by commas', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label for="instagram_link">Instagram Link</label>
+          {{ form.instagram_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+        </div>
+      
+        <div class="form-group">
+          <label for="image_link">Image Link</label>
+          {{ form.image_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+        </div>
+
+        <div class="form-group">
+            <label for="website_link">Website Link</label>
+            {{ form.website_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+          </div>
+
+          <div class="form-group">
+              <label for="seeking_actors">Looking for Actors</label>
+              {{ form.seeking_actors(placeholder='Actors', autofocus = true) }}
+          </div>
+
+          <div class="form-group">
+              <label for="seeking_description">Seeking Description</label>
+              {{ form.seeking_description(class_ = 'form-control', autofocus = true) }}
+            </div>
+      <input type="submit" value="Create Movie" class="btn btn-primary btn-lg btn-block">
+    </form>
+  </div>
+{% endblock %}

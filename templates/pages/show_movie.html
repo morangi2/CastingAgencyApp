@@ -1,0 +1,76 @@
+{% extends 'layouts/main.html' %}
+{% block title %}{{ movie.title }} | Movie{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-sm-6">
+		<h1 class="monospace">
+			{{ movie.title }}
+		</h1>
+		<p class="subtitle">
+			ID: {{ movie.id }}
+		</p>
+		<div class="genres">
+			{% for genre in movie.genre %}
+			<span class="genre">{{ genre }}</span>
+			{% endfor %}
+		</div>
+        <p>
+			<i class="fa fa-calendar"></i> {{ movie.release_date }}
+		</p>
+        <p>
+			<i class="fa fa-link"></i> {% if movie.website_link %}<a href="{{ movie.website_link }}" target="_blank">{{ movie.website_link }}</a>{% else %}No Website{% endif %}
+		</p>
+		<p>
+			<i class="fa fa-camera"></i> {% if movie.instagram_link %}<a href="{{ movie.instagram_link }}" target="_blank">{{ movie.instagram_link }}</a>{% else %}No Instagram Link{% endif %}
+        </p>
+		{% if movie.seeking_actors %}
+		<div class="seeking">
+			<p class="lead">Currently seeking actors to cast.</p>
+			<div class="description">
+				<i class="fas fa-quote-left"></i> {{ movie.seeking_description }} <i class="fas fa-quote-right"></i>
+			</div>
+		</div>
+		{% else %}	
+		<p class="not-seeking">
+			<i class="fas fa-moon"></i> Not currently seeking actors.
+		</p>
+		{% endif %}
+	</div>
+	<div class="col-sm-6">
+		<img src="{{ movie.image_link }}" alt="Movie Image" />
+	</div>
+</div>
+<section>
+	<h2 class="monospace">{{ movie.upcoming_showings_count }} Upcoming {% if movie.upcoming_showings_count == 1 %}Showing{% else %}Showings{% endif %}</h2>
+	<div class="row">
+		{%for showing in movie.upcoming_showings %}
+		<div class="col-sm-4">
+			<div class="tile tile-show">
+				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
+				<h5><a href="/movies/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<h6>{{ showing.start_time|datetime('full') }}</h6>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+<section>
+	<h2 class="monospace">{{ movie.past_showings_count }} Past {% if movie.past_showings_count == 1 %}Showing{% else %}Showings{% endif %}</h2>
+	<div class="row">
+		{%for showing in movie.past_showings %}
+		<div class="col-sm-4">
+			<div class="tile tile-show">
+				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
+				<h5><a href="/movies/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<h6>{{ showing.start_time|datetime('full') }}</h6>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+
+<a href="/movies/{{ movie.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
+<a href="/movies/{{ movie.id }}/delete"><button class="btn btn-primary btn-lg">Delete</button></a>
+
+{% endblock %}
+

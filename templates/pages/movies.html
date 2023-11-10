@@ -1,0 +1,16 @@
+{% extends 'layouts/main.html' %}
+{% block title %}CAST | Movies{% endblock %}
+{% block content %}
+<ul class="items">
+	{% for movie in movies %}
+	<li>
+		<a href="/movies/{{ movie.id }}">
+			<i class="fas fa-users"></i>
+			<div class="item">
+				<h5>{{ movie.title }}</h5>
+			</div>
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}

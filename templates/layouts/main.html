@@ -75,10 +75,22 @@
                 aria-label="Search">
               </form>
               {% endif %}
+              {% if (request.endpoint == 'movies') or
+                (request.endpoint == 'search_movies') or
+                (request.endpoint == 'show_movie') %}
+              <form class="search" method="post" action="/movies/search">
+                <input class="form-control"
+                type="search"
+                name="search_term"
+                placeholder="Find movie"
+                aria-label="Search">
+              </form>
+              {% endif %}
             </li>
           </ul>
           <ul class="nav navbar-nav">
             <li {% if request.endpoint == 'actors' %} class="active" {% endif %}><a href="{{ url_for('actors') }}">Actors</a></li>
+            <li {% if request.endpoint == 'movies' %} class="active" {% endif %}><a href="{{ url_for('movies') }}">Movies</a></li>
             <li {% if request.endpoint == 'artists' %} class="active" {% endif %}><a href="{{ url_for('artists') }}">Artists</a></li>
             <li {% if request.endpoint == 'shows' %} class="active" {% endif %}><a href="{{ url_for('shows') }}">Shows</a></li>
           </ul>

@@ -204,8 +204,53 @@ class ActorForm(Form):
     gender = StringField(
         'gender'
     )
+    genre = SelectMultipleField(
+        # TODO implement enum restriction
+        'genre', validators=[DataRequired()],
+        choices=[
+            ('Action', 'Action'),
+            ('Adventure', 'Adventure'),
+            ('Animation', 'Animation'),
+            ('Comedy', 'Comedy'),
+            ('Crime', 'Crime'),
+            ('Drama', 'Drama'),
+            ('Fantasy', 'Fantasy'),
+            ('History', 'History'),
+            ('Melodrama', 'Melodrama'),
+            ('Mystery', 'Mystery'),
+            ('Narrative', 'Narrative'),
+            ('Romance', 'Romance'),
+            ('Science Fiction', 'Science Fiction'),
+            ('Sports', 'Sports'),
+            ('Thriller', 'Thriller'),
+            ('War', 'War'),
+            ('Other', 'Other'),
+        ]
+    )
+    instagram_link = StringField(
+        'instagram_link', validators=[URL()]
+    )
+    website_link = StringField(
+        'website_link'
+    )
     image_link = StringField(
         'image_link'
+    )
+    seeking_casting = BooleanField( 
+        'seeking_casting' 
+    )
+    seeking_description = StringField(
+        'seeking_description'
+    )
+
+
+class MovieForm(Form):
+    title = StringField(
+        'title', validators=[DataRequired()]
+    )
+    release_date = DateTimeField(
+        'release_date',
+        validators=[DataRequired()]
     )
     genre = SelectMultipleField(
         # TODO implement enum restriction
@@ -239,9 +284,9 @@ class ActorForm(Form):
     image_link = StringField(
         'image_link'
     )
-
-    seeking_casting = BooleanField( 'seeking_casting' )
-
+    seeking_actors = BooleanField( 
+        'seeking_actors' 
+    )
     seeking_description = StringField(
         'seeking_description'
     )

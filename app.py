@@ -152,9 +152,9 @@ def show_actor(actor_id):
 
     for showing in showings_joinedwith_movies:
       this_showing = {}
-      this_showing['actor_id'] = showing.id
-      this_showing['actor_image_link'] = showing.image_link
-      this_showing['actor_name'] = showing.name
+      this_showing['actor_id'] = showing.actor_id
+      this_showing['actor_image_link'] = showing.actor.image_link
+      this_showing['actor_name'] = showing.actor.name
       this_showing['start_time'] = showing.start_time
 
       showing_start_time = showing.start_time
@@ -332,6 +332,219 @@ def search_venues():
     search_response['data'].append(this_venue)
 
   return render_template('pages/search_venues.html', results=search_response, search_term=search_term)
+
+
+#  ----------------------------------------------------------------
+#  MOVIES
+#  ----------------------------------------------------------------
+
+@app.route('/movies')
+def movies():
+  all_movies = Movie.query.all()
+  movie_data = []
+
+  for movie in all_movies:
+    movie_formatted = {}
+    movie_formatted['id'] = movie.id
+    movie_formatted['title'] = movie.title
+    movie_data.append(movie_formatted)
+
+  return render_template('pages/movies.html', movies = movie_data)
+
+
+#2 methods for /movies/create route: get the form, then post the entry
+@app.route('/movies/create', methods=['GET'])
+def create_movie_form():
+  form = MovieForm()
+
+  return render_template('forms/new_movie.html', form = form)
+
+@app.route('/movies/create', methods=['POST'])
+def create_movie_submission():
+  error = False
+  movie_title = ''
+
+  try:
+    form = MovieForm(request.form)
+    movie = Movie(title = form.title.data,
+                  release_date = form.release_date.data,
+                  genre = form.genre.data,
+                  website_link = form.website_link.data,
+                  image_link = form.image_link.data,
+                  instagram_link = form.instagram_link.data,
+                  seeking_actors = form.seeking_actors.data,
+                  seeking_description = form.seeking_description.data)
+    
+    movie_title = form.title.data
+    db.session.add(movie)
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    flash('ERROR: Movie was not added to our records.')
+  finally:
+    db.session.close()
+  if error:
+    error = False
+    print(sys.exc_info())
+  else:
+    flash('Movie ' + movie_title + ' was successfully listed!')
+  
+  return render_template('pages/home.html')
+
+
+@app.route('/movies/<int:movie_id>')
+def show_movie(movie_id):
+  error = False
+
+  try:
+    movie_selected = Movie.query.get(movie_id)
+    showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
+
+    movie_selected_data = {}
+
+    movie_selected_data['id'] = movie_selected.id
+    movie_selected_data['title'] = movie_selected.title
+    movie_selected_data['release_date'] = movie_selected.release_date
+    movie_selected_data['genre'] = movie_selected.genre
+    movie_selected_data['website_link'] = movie_selected.website_link
+    movie_selected_data['instagram_link'] = movie_selected.instagram_link
+    movie_selected_data['image_link'] = movie_selected.image_link
+    movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
+    movie_selected_data['seeking_description'] = movie_selected.seeking_description
+    movie_selected_data['past_showings'] = []
+    movie_selected_data['upcoming_showings'] = []
+    movie_selected_data['past_showings_count'] = 0
+    movie_selected_data['upcoming_showings_count'] = 0
+
+    for showing in showings_joinedwith_actors:
+      this_showing = {}
+      this_showing['actor_id'] = showing.actor_id
+      this_showing['actor_name'] = showing.actor.name
+      this_showing['actor_image_link'] = showing.actor.image_link
+      this_showing['start_time'] = showing.start_time
+
+      showing_start_time = showing.start_time
+      showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+      timestamp_db = datetime.timestamp(showing_start_time_formatted)
+      timestamp_current = time.time()
+
+      if timestamp_current > timestamp_db:
+        movie_selected_data['past_showings'].append(this_showing)
+        movie_selected_data['past_showings_count'] += 1
+      else:
+        movie_selected_data['upcoming_showings'].append(this_showing)
+        movie_selected_data['upcoming_showings_count'] += 1
+
+  except:
+    error = True
+    print(sys.exc_info())
+  if error:
+    error = False
+    flash('This Movie does NOT exist in our records.')
+    abort(404)
+  
+  return render_template('pages/show_movie.html', movie = movie_selected_data)
+
+
+# patch movie
+# uses 2 methods; edit/get to load preexisting data, and edit/post to post changes made
+@app.route('/movies/<int:movie_id>/edit', methods=['GET'])
+def edit_movie(movie_id):
+  form = MovieForm()
+  movie_to_edit = Movie.query.get(movie_id)
+  print('*******MOVIE TO EDIT *******')
+  
+  movie_data = {}
+
+  #load movie object
+  movie_data['id'] = movie_to_edit.id
+  movie_data['title'] = movie_to_edit.title
+  movie_data['release_date'] = movie_to_edit.release_date
+  movie_data['genre'] = movie_to_edit.genre
+  movie_data['website_link'] = movie_to_edit.website_link
+  movie_data['instagram_link'] = movie_to_edit.instagram_link
+  movie_data['image_link'] = movie_to_edit.image_link
+  movie_data['seeking_actors'] = movie_to_edit.seeking_actors
+  movie_data['seeking_description'] = movie_to_edit.seeking_description
+
+
+  #load form object
+  form.title.data = movie_to_edit.title
+  #form.release_date.data = movie_to_edit.release_date
+  form.genre.data = movie_to_edit.genre
+  form.website_link.data = movie_to_edit.website_link
+  form.image_link.data = movie_to_edit.image_link
+  form.instagram_link.data = movie_to_edit.instagram_link
+  form.seeking_actors.data = movie_to_edit.seeking_actors
+  form.seeking_description.data = movie_to_edit.seeking_description
+
+  print('*******RELEASE DATE*******')
+  print(type(form.release_date.data))
+ 
+
+  return render_template('forms/edit_movie.html', form=form, movie=movie_data)
+
+
+
+@app.route('/movies/<int:movie_id>/edit', methods=['POST'])
+def edit_movie_submission(movie_id):
+  error = False
+  form = MovieForm(request.form)
+
+  try:
+    movie_to_edit = Movie.query.get(movie_id)
+
+    movie_to_edit.title = form.title.data
+    movie_to_edit.release_date = form.release_date.data
+    movie_to_edit.genre = form.genre.data
+    movie_to_edit.website_link = form.website_link.data
+    movie_to_edit.image_link = form.image_link.data
+    movie_to_edit.instagram_link = form.instagram_link.data
+    movie_to_edit.seeking_actors = form.seeking_actors.data
+    movie_to_edit.seeking_description = form.seeking_description.data
+
+    db.session.commit()
+
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    error = False
+    flash('an error occured, edit unsuccessful.')
+    abort(500)
+  else:
+    flash('edit was successfull!')
+
+  return redirect(url_for('show_movie', movie_id = movie_id))
+
+
+
+@app.route('/movies/<int:movie_id>/delete', methods = ['GET'])
+def delete_movie(movie_id):
+  error = False
+  try:
+    Movie.query.filter_by(id = movie_id).delete()
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    error = False
+    flash('An error occured. Deletion not successful.')
+    abort(404)
+  else:
+    flash('Movie successfully deleted.')
+
+  return render_template('pages/home.html')
+
+
 
 
 
