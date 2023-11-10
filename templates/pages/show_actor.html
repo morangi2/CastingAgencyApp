@@ -1,0 +1,82 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Actor Search{% endblock %}
+{% block content %}
+<div class="row">
+	<div class="col-sm-6">
+		<h1 class="monospace">
+			{{ actor.name }}
+		</h1>
+		<p class="subtitle">
+			ID: {{ actor.id }}
+		</p>
+		<div class="genres">
+			{% for genre in actor.genres %}
+			<span class="genre">{{ genre }}</span>
+			{% endfor %}
+		</div>
+		<p>
+			<i class="fas fa-globe-americas"></i> {{ actor.city }}, {{ actor.state }}
+		</p>
+		<p>
+			<i class="fas fa-map-marker"></i> {% if actor.gender %}{{ actor.gender }}{% else %}No Gender{% endif %}
+		</p>
+		<p>
+			<i class="fas fa-phone-alt"></i> {% if actor.age %}{{ actor.age }}{% else %}No Age{% endif %}
+		</p>
+		<p>
+			<i class="fas fa-link"></i> {% if actor.website_link %}<a href="{{ actor.website_link }}" target="_blank">{{ actor.website_link }}</a>{% else %}No Website{% endif %}
+		</p>
+		<p>
+			<i class="fab fa-facebook-f"></i> {% if actor.instagram_link %}<a href="{{ actor.instagram_link }}" target="_blank">{{ actor.instagram_link }}</a>{% else %}No Instagram Link{% endif %}
+		</p>
+		{% if actor.seeking_talent %}
+		<div class="seeking">
+			<p class="lead">Currently seeking casting</p>
+			<div class="description">
+				<i class="fas fa-quote-left"></i> {{ actor.seeking_description }} <i class="fas fa-quote-right"></i>
+			</div>
+		</div>
+		{% else %}	
+		<p class="not-seeking">
+			<i class="fas fa-moon"></i> Not currently seeking casting
+		</p>
+		{% endif %}
+	</div>
+	<div class="col-sm-6">
+		<img src="{{ actor.image_link }}" alt="Actor Image" />
+	</div>
+</div>
+<section>
+	<h2 class="monospace">{{ actor.upcoming_showings_count }} Upcoming {% if actor.upcoming_showings_count == 1 %}Showing{% else %}Showings{% endif %}</h2>
+	<div class="row">
+		{%for showing in actor.upcoming_showings %}
+		<div class="col-sm-4">
+			<div class="tile tile-show">
+				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
+				<h5><a href="/actors/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<h6>{{ showing.start_time|datetime('full') }}</h6>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+<section>
+	<h2 class="monospace">{{ actor.past_showings_count }} Past {% if actor.past_showings_count == 1 %}Showing{% else %}Showings{% endif %}</h2>
+	<div class="row">
+		{%for showing in actor.past_showings %}
+		<div class="col-sm-4">
+			<div class="tile tile-show">
+				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
+				<h5><a href="/actors/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<h6>{{ showing.start_time|datetime('full') }}</h6>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+
+<a href="/actors/{{ actor.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
+<a href="/actors/{{ actor.id }}/delete"><button class="btn btn-primary btn-lg" onclick="" >Delete</button></a>
+
+{% endblock %}
+

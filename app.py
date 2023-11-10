@@ -122,6 +122,66 @@ def create_actor_submission():
 
   return render_template('pages/home.html')
 
+
+@app.route('/actors/<int:actor_id>')
+def show_actor(actor_id):
+  error = False
+
+  try:
+    actor_selected_data = {}
+    actor_selected = Actor.query.get(actor_id)
+    showings_joinedwith_movies = Showing.query.filter_by(actor_id=actor_id).join(Movie).all()
+
+    actor_selected_data['id'] = actor_selected.id
+    actor_selected_data['name'] = actor_selected.name
+    actor_selected_data['age'] = actor_selected.age
+    actor_selected_data['gender'] = actor_selected.gender
+    actor_selected_data['city'] = actor_selected.city
+    actor_selected_data['state'] = actor_selected.state
+    actor_selected_data['genre'] = actor_selected.genre
+    actor_selected_data['instagram_link'] = actor_selected.instagram_link
+    actor_selected_data['website_link'] = actor_selected.website_link
+    actor_selected_data['image_link'] = actor_selected.image_link
+    actor_selected_data['seeking_casting'] = actor_selected.seeking_casting
+    actor_selected_data['seeking_description'] = actor_selected.seeking_description
+    actor_selected_data['upcoming_showings_count'] = 0
+    actor_selected_data['upcoming_showings'] = []
+    actor_selected_data['past_showings_count'] = 0
+    actor_selected_data['past_showings'] = []
+
+    for showing in showings_joinedwith_movies:
+      this_showing = {}
+      this_showing['actor_id'] = showing.id
+      this_showing['actor_image_link'] = showing.image_link
+      this_showing['actor_name'] = showing.name
+      this_showing['start_time'] = showing.start_time
+
+      showing_start_time = showing.start_time
+      showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+      timestamp_db = datetime.timestamp(showing_start_time_formatted)
+      timestamp_current = time.time()
+
+      if timestamp_current > timestamp_db:
+        actor_selected_data['past_showings_count'] += 1
+        actor_selected_data['past_showings'].append(this_showing)
+      else:
+        actor_selected_data['upcoming_showings_count'] += 1
+        actor_selected_data['upcoming_showings'].append(this_showing)
+
+  except:
+    error = True
+    print(sys.exc_info())
+  if error:
+    error = False
+    flash('This actor does NOT exist in our records.')
+    return render_template('pages/home.html')
+  
+  return render_template('pages/show_actor.html', actor=actor_selected_data)
+
+
+
+
+
 #  Venues
 #  ----------------------------------------------------------------
 
