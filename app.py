@@ -199,6 +199,9 @@ def edit_actor(actor_id):
   actor_data['seeking_casting'] = actor_to_edit.seeking_casting
   actor_data['seeking_description'] = actor_to_edit.seeking_description
 
+  print('****CASTING SEEKING EDIT/GET******')
+  print(actor_to_edit.seeking_casting)
+
   #populate the form with existing actor data
   form.name.data = actor_to_edit.name
   form.age.data = actor_to_edit.age
@@ -211,6 +214,9 @@ def edit_actor(actor_id):
   form.website_link.data = actor_to_edit.website_link
   form.seeking_casting.data = actor_to_edit.seeking_casting
   form.seeking_description.data = actor_to_edit.seeking_description
+
+  print('****CASTING SEEKING EDIT/POST/form display******')
+  print(form.seeking_casting.data)
 
   return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
 
@@ -236,6 +242,8 @@ def edit_actor_submission(actor_id):
     actor_edit.seeking_casting = form.seeking_casting.data
     actor_edit.seeking_description = form.seeking_description.data
 
+    print('****CASTING SEEKING EDIT/POST******')
+    print(form.seeking_casting.data)
     db.session.commit()
   except:
     error = True
@@ -251,6 +259,26 @@ def edit_actor_submission(actor_id):
     flash('Edit was successful!')
 
   return redirect(url_for('show_actor', actor_id = actor_id))
+
+
+@app.route('/actors/<int:actor_id>/delete', methods=['GET'])
+def delete_actor(actor_id):
+  error = False
+
+  try:
+    Actor.query.filter_by(id = actor_id).delete()
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+  finally:
+    db.session.close()
+  if error:
+    error = False
+    flash('An error occured. Venue not deleted.')
+    abort(404)
+
+  return redirect(url_for('index'))
 
 
 #  Venues
