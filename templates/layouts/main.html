@@ -75,6 +75,17 @@
                   aria-label="Search">
               </form>
               {% endif %}
+              {% if (request.endpoint == 'actors') or
+                (request.endpoint == 'search_actors') or
+                (request.endpoint == 'show_actor') %}
+              <form class="search" method="post" action="/actors/search">
+                <input class="form-control"
+                type="search"
+                name="search_term"
+                placeholder="Find actor"
+                aria-label="Search">
+              </form>
+              {% endif %}
             </li>
           </ul>
           <ul class="nav navbar-nav">

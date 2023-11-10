@@ -179,7 +179,78 @@ def show_actor(actor_id):
   return render_template('pages/show_actor.html', actor=actor_selected_data)
 
 
+@app.route('/actors/<int:actor_id>/edit', methods=['GET'])
+def edit_actor(actor_id):
+  form = ActorForm()
+  actor_data = {}
+  actor_to_edit = Actor.query.get(actor_id)
 
+  #pass all the actor data
+  actor_data['id'] = actor_to_edit.id
+  actor_data['name'] = actor_to_edit.name
+  actor_data['age'] = actor_to_edit.age
+  actor_data['gender'] = actor_to_edit.gender
+  actor_data['genre'] = actor_to_edit.genre
+  actor_data['city'] = actor_to_edit.city
+  actor_data['state'] = actor_to_edit.state
+  actor_data['image_link'] = actor_to_edit.image_link
+  actor_data['website_link'] = actor_to_edit.website_link
+  actor_data['instagram_link'] = actor_to_edit.instagram_link
+  actor_data['seeking_casting'] = actor_to_edit.seeking_casting
+  actor_data['seeking_description'] = actor_to_edit.seeking_description
+
+  #populate the form with existing actor data
+  form.name.data = actor_to_edit.name
+  form.age.data = actor_to_edit.age
+  form.gender.data = actor_to_edit.gender
+  form.genre.data = actor_to_edit.genre
+  form.city.data = actor_to_edit.city
+  form.state.data = actor_to_edit.state
+  form.image_link.data = actor_to_edit.image_link
+  form.instagram_link.data = actor_to_edit.instagram_link
+  form.website_link.data = actor_to_edit.website_link
+  form.seeking_casting.data = actor_to_edit.seeking_casting
+  form.seeking_description.data = actor_to_edit.seeking_description
+
+  return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
+
+@app.route('/actors/<int:actor_id>/edit', methods=['POST'])
+def edit_actor_submission(actor_id):
+  error = False
+
+  try:
+    #actor to edit
+    actor_edit = Actor.query.get(actor_id)
+    #form details
+    form = ActorForm(request.form)
+
+    actor_edit.name = form.name.data
+    actor_edit.age = form.age.data
+    actor_edit.gender = form.gender.data
+    actor_edit.genre = form.genre.data
+    actor_edit.city = form.city.data
+    actor_edit.state = form.state.data
+    actor_edit.instagram_link = form.instagram_link.data
+    actor_edit.website_link = form.website_link.data
+    actor_edit.image_link = form.image_link.data
+    actor_edit.seeking_casting = form.seeking_casting.data
+    actor_edit.seeking_description = form.seeking_description.data
+
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    error = False
+    flash('Edit was UNSUCCESSFUL! Please try again.')
+    abort(404)
+  else:
+    flash('Edit was successful!')
+
+  return redirect(url_for('show_actor', actor_id = actor_id))
 
 
 #  Venues
