@@ -135,6 +135,118 @@ class VenueForm(Form):
 
 
 
+class ActorForm(Form):
+    name = StringField(
+        'name', validators=[DataRequired()]
+    )
+    city = StringField(
+        'city', validators=[DataRequired()]
+    )
+    state = SelectField(
+        'state', validators=[DataRequired()],
+        choices=[
+            ('AL', 'AL'),
+            ('AK', 'AK'),
+            ('AZ', 'AZ'),
+            ('AR', 'AR'),
+            ('CA', 'CA'),
+            ('CO', 'CO'),
+            ('CT', 'CT'),
+            ('DE', 'DE'),
+            ('DC', 'DC'),
+            ('FL', 'FL'),
+            ('GA', 'GA'),
+            ('HI', 'HI'),
+            ('ID', 'ID'),
+            ('IL', 'IL'),
+            ('IN', 'IN'),
+            ('IA', 'IA'),
+            ('KS', 'KS'),
+            ('KY', 'KY'),
+            ('LA', 'LA'),
+            ('ME', 'ME'),
+            ('MT', 'MT'),
+            ('NE', 'NE'),
+            ('NV', 'NV'),
+            ('NH', 'NH'),
+            ('NJ', 'NJ'),
+            ('NM', 'NM'),
+            ('NY', 'NY'),
+            ('NC', 'NC'),
+            ('ND', 'ND'),
+            ('OH', 'OH'),
+            ('OK', 'OK'),
+            ('OR', 'OR'),
+            ('MD', 'MD'),
+            ('MA', 'MA'),
+            ('MI', 'MI'),
+            ('MN', 'MN'),
+            ('MS', 'MS'),
+            ('MO', 'MO'),
+            ('PA', 'PA'),
+            ('RI', 'RI'),
+            ('SC', 'SC'),
+            ('SD', 'SD'),
+            ('TN', 'TN'),
+            ('TX', 'TX'),
+            ('UT', 'UT'),
+            ('VT', 'VT'),
+            ('VA', 'VA'),
+            ('WA', 'WA'),
+            ('WV', 'WV'),
+            ('WI', 'WI'),
+            ('WY', 'WY'),
+        ]
+    )
+    age = StringField(
+        'age', validators=[DataRequired()]
+    )
+    gender = StringField(
+        'gender'
+    )
+    image_link = StringField(
+        'image_link'
+    )
+    genre = SelectMultipleField(
+        # TODO implement enum restriction
+        'genre', validators=[DataRequired()],
+        choices=[
+            ('Action', 'Action'),
+            ('Adventure', 'Adventure'),
+            ('Animation', 'Animation'),
+            ('Comedy', 'Comedy'),
+            ('Crime', 'Crime'),
+            ('Drama', 'Drama'),
+            ('Fantasy', 'Fantasy'),
+            ('History', 'History'),
+            ('Melodrama', 'Melodrama'),
+            ('Mystery', 'Mystery'),
+            ('Narrative', 'Narrative'),
+            ('Romance', 'Romance'),
+            ('Science Fiction', 'Science Fiction'),
+            ('Sports', 'Sports'),
+            ('Thriller', 'Thriller'),
+            ('War', 'War'),
+            ('Other', 'Other'),
+        ]
+    )
+    instagram_link = StringField(
+        'instagram_link', validators=[URL()]
+    )
+    website_link = StringField(
+        'website_link'
+    )
+    image_link = StringField(
+        'image_link'
+    )
+
+    seeking_casting = BooleanField( 'seeking_casting' )
+
+    seeking_description = StringField(
+        'seeking_description'
+    )
+
+
 class ArtistForm(Form):
     name = StringField(
         'name', validators=[DataRequired()]

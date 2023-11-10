@@ -19,10 +19,18 @@ class Actor(db.Model):
    name = db.Column(db.String, nullable=False)
    age = db.Column(db.Integer, nullable=False)
    gender = db.Column(db.String, nullable=False)
+   city = db.Column(db.String, nullable=False)
+   state = db.Column(db.String, nullable=False)
+   genre = db.Column(db.String, nullable=False)
+   instagram_link = db.Column(db.String, nullable=False)
+   website_link = db.Column(db.String, nullable=False)
+   image_link = db.Column(db.String, nullable=False)
+   seeking_casting = db.Column(db.String, nullable=False)
+   seeking_description = db.Column(db.String, nullable=False)
    show = db.relationship('Showing', backref='actor', lazy=True)
 
    def __repr__(self):
-      return f'<NEW ACTOR: {self.id} {self.name} {self.age} {self.gender}>'
+      return f'<NEW ACTOR: {self.id} {self.name} {self.age} {self.gender} {self.city} {self.state} {self.genre} {self.instagram_link} {self.website_link} {self.image_link} {self.seeking_casting} {self.seeking_description}>'
    
 class Movie(db.Model):
    __tablename__ = 'movies'
@@ -30,10 +38,16 @@ class Movie(db.Model):
    id = db.Column(db.Integer, primary_key=True)
    title = db.Column(db.String, nullable=False)
    release_date = db.Column(db.String, nullable=False)
+   genre = db.Column(db.String, nullable=False)
+   instagram_link = db.Column(db.String, nullable=False)
+   website_link = db.Column(db.String, nullable=False)
+   image_link = db.Column(db.String, nullable=False)
+   seeking_actors = db.Column(db.String, nullable=False)
+   seeking_description = db.Column(db.String, nullable=False)
    showing = db.relationship('Showing', backref='movie', lazy=True)
 
    def __repr__(self):
-      return f'<NEW MOVIE: {self.id} {self.title} {self.release_date}>'
+      return f'<NEW MOVIE: {self.id} {self.title} {self.release_date} {self.genre} {self.instagram_link} {self.website_link} {self.image_link} {self.seeking_actors} {self.seeking_description}>'
    
 class Showing(db.Model):
    __tablename__ = 'showings'

@@ -52,6 +52,75 @@ def index():
     print(os.environ['DATABASE_URL'])
   return render_template('pages/home.html')
 
+#  ----------------------------------------------------------------
+#  ACTORS
+#  ----------------------------------------------------------------
+
+@app.route('/actors')
+def actors():
+  actors_list = Actor.query.distinct('city')
+  actors = []
+
+  for one_actor in actors_list:
+    actor_data = {}
+    """ actor_data['name'] = one_actor.name
+    actor_data['age'] = one_actor.age
+    actor_data['gender'] = one_actor.gender """
+    actor_data['city'] = one_actor.city
+    actor_data['state'] = one_actor.state
+    actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
+    actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
+    actors.append(actor_data)
+
+  return render_template('pages/actors.html', actors=actors)
+
+@app.route('/actors/create', methods=['GET'])
+def create_actor_form():
+  actor_form = ActorForm()
+  return render_template('forms/new_actor.html', form=actor_form)
+
+@app.route('/actors/create', methods=['POST'])
+def create_actor_submission():
+  error = False
+  actor_name = ''
+  data = {}
+
+  try:
+    form = ActorForm(request.form)
+
+    actor = Actor(name = form.name.data,
+                  age = form.age.data,
+                  gender = form.gender.data,
+                  city = form.city.data,
+                  state = form.state.data,
+                  genre = form.genre.data,
+                  instagram_link = form.instagram_link.data,
+                  website_link = form.website_link.data,
+                  image_link = form.image_link.data,
+                  seeking_casting = form.seeking_casting.data,
+                  seeking_description = form.seeking_description.data)
+    
+    db.session.add(actor)
+    db.session.commit()
+
+    actor_name = form.name.data
+
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  
+  finally:
+    db.session.close()
+  
+  if error:
+    error = False
+    print(sys.exc_info())
+    flash('An ERROR occured. Actor ' + actor_name + ' could not be added.')
+  else:
+    flash('Actor ' + actor_name + ' added successfully!')
+
+  return render_template('pages/home.html')
 
 #  Venues
 #  ----------------------------------------------------------------
@@ -273,7 +342,7 @@ def delete_venue(venue_id):
     error = False
     flash('An error occured. Venue could NOT be deleted.')
     abort(404)
-  
+ 
   return redirect(url_for('index'))
 
 

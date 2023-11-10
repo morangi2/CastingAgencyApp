@@ -1,0 +1,63 @@
+{% extends 'layouts/main.html' %}
+{% block title %}New Actor{% endblock %}
+{% block content %}
+  <div class="form-wrapper">
+    <form method="post" class="form" action="/actors/create">
+      <h3 class="form-heading">List a new actor <a href="{{ url_for('index') }}" title="Back to homepage"><i class="fa fa-home pull-right"></i></a></h3>
+      <div class="form-group">
+        <label for="name">Name</label>
+        {{ form.name(class_ = 'form-control', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label>City & State</label>
+          <div class="form-inline">
+            <div class="form-group">
+              {{ form.city(class_ = 'form-control', placeholder='City', autofocus = true) }}
+            </div>
+            <div class="form-group">
+              {{ form.state(class_ = 'form-control', placeholder='State', autofocus = true) }}
+            </div>
+          </div>
+      </div>
+      <div class="form-group">
+        <label for="age">Age</label>
+        {{ form.age(class_ = 'form-control', placeholder='age', autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label for="gender">Gender</label>
+          {{ form.gender(class_ = 'form-control', placeholder='gender', autofocus = true) }}
+        </div>
+      <div class="form-group">
+        <label for="genre">Genre</label>
+        <small>Ctrl+Click to select multiple</small>
+        {{ form.genre(class_ = 'form-control', placeholder='Genre, separated by commas', autofocus = true) }}
+      </div>
+      
+      <div class="form-group">
+          <label for="instagram_link">Instagram Link</label>
+          {{ form.instagram_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+       </div>
+      
+       <div class="form-group">
+          <label for="image_link">Image Link</label>
+          {{ form.image_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+       </div>
+
+       <div class="form-group">
+            <label for="website_link">Website Link</label>
+            {{ form.website_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
+       </div>
+
+       <div class="form-group">
+             <label for="seeking_casting">Looking for Casting opportunities</label>
+             {{ form.seeking_casting(placeholder='Venue', autofocus = true) }}
+       </div>
+
+       <div class="form-group">
+            <label for="seeking_description">Seeking Description</label>
+            {{ form.seeking_description(class_ = 'form-control', placeholder='Description', autofocus = true) }}
+       </div>
+      <input type="submit" value="Create NEW Actor" class="btn btn-primary btn-lg btn-block">
+    </form>
+  </div>
+{% endblock %}
