@@ -1,0 +1,17 @@
+{% extends 'layouts/main.html' %}
+{% block title %}CAST | Showings{% endblock %}
+{% block content %}
+<div class="row shows">
+    {%for showing in showings %}
+    <div class="col-sm-4">
+        <div class="tile tile-show">
+            <img src="{{ showing.movie_image_link }}" alt="Movie Image" />
+            <h4>{{ showing.start_time|datetime('full') }}</h4>
+            <h5><a href="/movies/{{ showing.movie_id }}">{{ showing.movie_title }}</a></h5>
+            <p>Starring</p>
+            <h5><a href="/actors/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

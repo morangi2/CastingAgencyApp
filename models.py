@@ -31,7 +31,7 @@ class Actor(db.Model):
 
    def __repr__(self):
       return f'<NEW ACTOR: {self.id} {self.name} {self.age} {self.gender} {self.city} {self.state} {self.genre} {self.instagram_link} {self.website_link} {self.image_link} {self.seeking_casting} {self.seeking_description}>'
-   
+  
 class Movie(db.Model):
    __tablename__ = 'movies'
 
@@ -54,6 +54,7 @@ class Showing(db.Model):
 
    id = db.Column(db.Integer, primary_key=True)
    actor_id = db.Column(db.Integer, db.ForeignKey('actors.id'), nullable=False)
+   #actor_id_2 = db.Column(db.Integer, db.ForeignKey('actors.id'), nullable=True)
    movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=False)
    start_time = db.Column(db.String, nullable=False)
 
