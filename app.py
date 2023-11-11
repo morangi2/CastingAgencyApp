@@ -540,7 +540,6 @@ def create_showing_submission():
     form = ShowingForm(request.form)
 
     showing_created = Showing(actor_id = form.actor_id.data,
-                              actor_id_2 = form.actor_id_2.data,
                               movie_id = form.movie_id.data,
                               start_time = form.start_time.data)
     
@@ -589,79 +588,9 @@ def showings():
   return render_template('pages/showings.html', showings = all_showings)
 
 
-@app.route('/shows')
-def shows():
-  # displays list of shows at /shows
-  # TODO: replace with real venues data. == DONE
-  print("********INSIDE SHOWS**********")
-  all_shows = Show.query.all()
-  shows_data = []
-
-  #traverse all shows and get the required show, venue and artist data for our view
-  for show in all_shows:
-    this_show = {}
-    this_show['venue_id'] = show.venue_id
-    this_show['venue_name'] = show.venue.name
-    this_show['artist_id'] = show.artist_id
-    this_show['artist_name'] = show.artist.name
-    this_show['artist_image_link'] = show.artist.image_link
-    this_show['start_time'] = show.start_time
-
-    shows_data.append(this_show)
-
-  return render_template('pages/shows.html', shows=shows_data)
 
 
 
-@app.route('/shows/create')
-def create_shows():
-  # renders form. do not touch.
-  form = ShowForm()
-  return render_template('forms/new_show.html', form=form)
-
-@app.route('/shows/create', methods=['POST'])
-def create_show_submission():
-  # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead == DONE
-
-  error = False
-  error_date_format = False
-
-  try:
-    artist_id = request.form['artist_id']
-    venue_id = request.form['venue_id']
-    start_time = request.form['start_time']
-    date_format = '%Y-%m-%d %H:%M:%S'
-
-    #try validating the date, raise ValueError otherwise
-    dateObject = datetime.strptime(start_time, date_format)
-    show = Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
-
-    db.session.add(show)
-    db.session.commit()
-  except ValueError:
-    error_date_format = True
-    db.session.rollback()
-  except:
-    error = True
-    db.session.rollback()
-  finally:
-    db.session.close()
-  if error or error_date_format:
-    # TODO: on unsuccessful db insert, flash an error instead. == DONE
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    if error:
-      error = False
-      flash('An error occured, show not be listed: Incorrect artist ID or venue ID')
-    else:
-      error_date_format = False
-      flash('An error occured, show not listed: Incorrect date format, should be YYYY-MM-DD HR:MIN:SEC eg: 2023-10-26 13:58:22')
-  else:
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-
-  return render_template('pages/home.html')
 
 
 @app.errorhandler(404)
