@@ -52,8 +52,8 @@
 		{%for showing in actor.upcoming_showings %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
-				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
-				<h5><a href="/actors/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<img src="{{ showing.movie_image_link }}" alt="Show Movie Image" />
+				<h5><a href="/movies/{{ showing.movie_id }}"> {{ showing.movie_title }}</a></h5>
 				<h6>{{ showing.start_time|datetime('full') }}</h6>
 			</div>
 		</div>
@@ -66,8 +66,8 @@
 		{%for showing in actor.past_showings %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
-				<img src="{{ showing.actor_image_link }}" alt="Show Actor Image" />
-				<h5><a href="/actors/{{ showing.actor_id }}">{{ showing.actor_name }}</a></h5>
+				<img src="{{ showing.movie_image_link }}" alt="Show Movie Image" />
+				<h5><a href="/movies/{{ showing.movie_id }}"> {{ showing.movie_title }}</a></h5>
 				<h6>{{ showing.start_time|datetime('full') }}</h6>
 			</div>
 		</div>

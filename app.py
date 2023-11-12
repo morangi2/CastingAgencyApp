@@ -110,6 +110,9 @@ def show_actor(actor_id):
       this_showing['actor_image_link'] = showing.actor.image_link
       this_showing['actor_name'] = showing.actor.name
       this_showing['start_time'] = showing.start_time
+      this_showing['movie_id'] = showing.movie.id
+      this_showing['movie_title'] = showing.movie.title
+      this_showing['movie_image_link'] = showing.movie.image_link
 
       showing_start_time = showing.start_time
       showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
