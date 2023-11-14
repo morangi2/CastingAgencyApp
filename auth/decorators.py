@@ -79,7 +79,7 @@ def check_permissions(permission, payload):
         raise AuthError(
             {
                 'code': 'missing_permissions_string',
-                'description': 'sorry, your account has not been assigned any permissions yet.'
+                'description': 'Sorry, your account has not been assigned any permissions yet.'
             }, 401
         )
     
@@ -87,7 +87,7 @@ def check_permissions(permission, payload):
         raise AuthError(
             {
                 'code': 'permissions_not_included',
-                'description': 'sorry, you do not have permission to perform this action'
+                'description': 'Sorry, you do not have permission to perform this action.'
             }, 403
         )
     

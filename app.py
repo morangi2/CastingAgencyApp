@@ -749,7 +749,21 @@ def server_error(error):
 # -------------------------------------------------------------------
 # implement error handler for AuthError
 # -------------------------------------------------------------------
+@app.errorhandler(AuthError)
+def auth_error(error):
+    print('***** AUTH ERROR ******')
+    print(error)
 
+    error_details = {}
+
+    error_details['success'] = False
+    error_details['error'] = error.status_code
+    error_details['message'] = error.error.get('description')
+    error_details['developer_code'] = error.error.get('code')
+
+    return render_template('errors/autherror.html', error_details = error_details)
+
+""" 
 @app.errorhandler(AuthError)
 def auth_error(error):
   print('***** AUTH ERROR ******')
@@ -762,7 +776,7 @@ def auth_error(error):
       "message": error.error.get('description')
     }
   ), error.status_code
-
+ """
 
 if not app.debug:
     file_handler = FileHandler('error.log')

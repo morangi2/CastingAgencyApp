@@ -1,0 +1,14 @@
+{% extends 'layouts/main.html' %}
+{% block content %}
+<h1>Oops ...</h1>
+<p><b>For User:</b></p>
+<p>{{ error_details.message }}</p>
+<p></p>
+<p><b>For Developer:</b></p>
+<li>Error code: {{ error_details.error }}</li>
+<li>Success: {{ error_details.success }}</li>
+<li>Code: {{ error_details.developer_code }}</li>
+
+
+<a href="{{url_for('index')}}"><button class="btn btn-primary btn-lg">Back</button></a>
+{% endblock %}
