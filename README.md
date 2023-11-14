@@ -1,7 +1,30 @@
 ## Full Stack Web Developer Nanodegree (CAPSTONE Project)
 This is the public repository for Udacity's Full-Stack Nanodegree capstone project. The starter-code of this project came from [Udacity's Fyrr app starte code](https://github.com/udacity/cd0046-SQL-and-Data-Modeling-for-the-Web)
 
------
+----
+
+## To run the app for the first time:
+- cd to the root directory (starter_code)
+- create and start your virtual environment
+```
+***
+source venv/bin/activate
+```
+- activate the setup environment; run
+```
+chmod +x setup.sh
+source setup.sh
+```
+- ensure your postgress server is running
+- use the commands below to start the app
+```
+export FLASK_APP=myapp
+export FLASK_DEBUG=true
+export FLASK_ENV=development # enables debug mode
+python3 app.py
+```
+
+
 
 ## Introduction
 
