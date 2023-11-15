@@ -5,7 +5,7 @@
 import datetime
 import dateutil.parser
 import babel
-from flask import abort, render_template, request, flash, redirect, url_for
+from flask import abort, jsonify, render_template, request, flash, redirect, url_for
 #from markupsafe import Markup
 import logging
 from logging import Formatter, FileHandler
@@ -13,7 +13,7 @@ from forms import *
 import sys, time
 from models import *
 import os
-from auth.decorators import requires_auth, AuthError
+from auth.decorators import AuthError
 #----------------------------------------------------------------------------#
 # App Config.
 # TODO: Refactored to file models.py == DONE
@@ -26,6 +26,8 @@ from auth.decorators import requires_auth, AuthError
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
+
+
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
@@ -51,13 +53,14 @@ def index():
   #session['user'] = token
   return render_template('pages/home.html')
 
-def add(number_one, number_two):
-  return number_one + number_two
-
-def divide(number_one, number_two):
-  if number_two == 0:
-    raise ValueError
-  return number_one / number_two
+# test connection and local setup
+@app.route("/hello")
+def hello():
+    return jsonify(
+       {
+          "greeting": "Hello Mercy"
+       }
+    ) 
 
 #  ----------------------------------------------------------------
 #  ACTORS
@@ -66,48 +69,37 @@ def divide(number_one, number_two):
 #  Show ALL ACTORS
 #  ----------------------------------------------------------------
 @app.route('/actors')
-@requires_auth('get:actors')
-def actors(payload):
-  if 'get:actors' in payload['permissions']:
-    print('**** payload deeeets /actors *****')
-    print(payload['permissions'])
-
+def actors():
     try:
-      actors_list = Actor.query.distinct('city')
-      actors = []
-      selection = Actor.query.all()
+        actors_list = Actor.query.distinct('city')
+        actors = []
+        selection = Actor.query.all()
 
-      for one_actor in actors_list:
-        actor_data = {}
-        """ actor_data['name'] = one_actor.name
-        actor_data['age'] = one_actor.age
-        actor_data['gender'] = one_actor.gender """
-        actor_data['city'] = one_actor.city
-        actor_data['state'] = one_actor.state
-        actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
-        actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
-        actors.append(actor_data)
+        for one_actor in actors_list:
+            actor_data = {}
+            actor_data['city'] = one_actor.city
+            actor_data['state'] = one_actor.state
+            actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
+            actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
+            actors.append(actor_data)
 
-      print('**** all actors... *****')
-      print(actors)
 
-      return render_template('pages/actors.html', actors=actors)
-    
+        return jsonify(
+            {
+                "success": True,
+                "total_actors": len(selection)
+            }
+        )
+
     except Exception as e:
-      print(e)
-      abort(404)
-  else:
-    abort(AuthError)
-  
+        print(e)
+        abort(404)
+
 
 #  Show ONE ACTOR
 #  ----------------------------------------------------------------
 @app.route('/actors/<int:actor_id>')
-@requires_auth('get:actors')
-def show_actor(payload, actor_id):
-  if 'get:actors' in payload['permissions']:
-    print('****payload deeeets /actors/ID*****')
-    print(payload['permissions'])
+def show_actor(actor_id):
 
     error = False
 
@@ -164,9 +156,6 @@ def show_actor(payload, actor_id):
       return render_template('pages/home.html')
     
     return render_template('pages/show_actor.html', actor=actor_selected_data)
-  
-  else:
-    abort(AuthError)
 
 
 
@@ -174,23 +163,13 @@ def show_actor(payload, actor_id):
 #  ----------------------------------------------------------------
 
 @app.route('/actors/create', methods=['GET'])
-@requires_auth('post:actors')
-def create_actor_form(payload):
-  if 'post:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/create GET FORM *****')
-    print(payload['permissions'])
-    
+def create_actor_form():
     actor_form = ActorForm()
     return render_template('forms/new_actor.html', form=actor_form)
-  else:
-    abort(AuthError)
+
 
 @app.route('/actors/create', methods=['POST'])
-@requires_auth('post:actors')
-def create_actor_submission(payload):
-  if 'post:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/create POST FORM*****')
-    print(payload['permissions'])
+def create_actor_submission():
 
     error = False
     actor_name = ''
@@ -232,19 +211,13 @@ def create_actor_submission(payload):
 
     return render_template('pages/home.html')
   
-  else:
-    abort(AuthError)
 
 
 #  Update ACTOR
 #  ----------------------------------------------------------------
 
 @app.route('/actors/<int:actor_id>/edit', methods=['GET'])
-@requires_auth('patch:actors')
-def edit_actor(payload, actor_id):
-  if 'patch:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/edit GET FORM *****')
-    print(payload['permissions'])
+def edit_actor(actor_id):
 
     form = ActorForm()
     actor_data = {}
@@ -284,19 +257,12 @@ def edit_actor(payload, actor_id):
     print(form.seeking_casting.data)
 
     return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
-  
-  else:
-    abort(AuthError)
+
 
 
 
 @app.route('/actors/<int:actor_id>/edit', methods=['POST'])
-@requires_auth('patch:actors')
-def edit_actor_submission(payload, actor_id):
-  if 'patch:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/edit POST FORM *****')
-    print(payload['permissions'])
-
+def edit_actor_submission(actor_id):
     error = False
 
     try:
@@ -335,18 +301,12 @@ def edit_actor_submission(payload, actor_id):
 
     return redirect(url_for('show_actor', actor_id = actor_id))
   
-  else:
-    abort(AuthError)
 
 
 #  Delete ACTOR
 #  ----------------------------------------------------------------
 @app.route('/actors/<int:actor_id>/delete', methods=['GET'])
-@requires_auth('delete:actors')
-def delete_actor(payload, actor_id):
-  if 'delete:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/delete *****')
-    print(payload['permissions'])
+def delete_actor(actor_id):
 
     error = False
 
@@ -365,9 +325,6 @@ def delete_actor(payload, actor_id):
       abort(404)
 
     return redirect(url_for('index'))
-  
-  else:
-    abort(AuthError)
 
 
 
@@ -379,11 +336,7 @@ def delete_actor(payload, actor_id):
 #  ----------------------------------------------------------------
 
 @app.route('/movies')
-@requires_auth('get:movies')
-def movies(payload):
-  if 'get:movies' in payload['permissions']:
-    print('**** payload deeeets /movies *****')
-    print(payload['permissions'])
+def movies():
 
     try:
       all_movies = Movie.query.all()
@@ -410,18 +363,13 @@ def movies(payload):
       print(e)
       abort(404)
   
-  else:
-    abort(AuthError)
+
 
 #  Show ONE MOVIE
 #  ----------------------------------------------------------------
 
 @app.route('/movies/<int:movie_id>')
-@requires_auth('get:movies')
-def show_movie(payload, movie_id):
-  if 'get:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID *****')
-    print(payload['permissions'])
+def show_movie(movie_id):
 
     error = False
 
@@ -473,9 +421,7 @@ def show_movie(payload, movie_id):
       abort(404)
     
     return render_template('pages/show_movie.html', movie = movie_selected_data)
-  
-  else:
-    abort(AuthError)
+
 
 
 
@@ -484,27 +430,15 @@ def show_movie(payload, movie_id):
 
 #2 methods for /movies/create route: get the form, then post the entry
 @app.route('/movies/create', methods=['GET'])
-@requires_auth('post:movies')
-def create_movie_form(payload):
-  if 'post:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/create GET FORM *****')
-    print(payload['permissions'])
-
+def create_movie_form():
     form = MovieForm()
 
     return render_template('forms/new_movie.html', form = form)
   
-  else:
-    abort(AuthError)
 
 
 @app.route('/movies/create', methods=['POST'])
-@requires_auth('post:movies')
-def create_movie_submission(payload):
-  if 'post:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/create POST FORM *****')
-    print(payload['permissions'])
-
+def create_movie_submission():
     error = False
     movie_title = ''
 
@@ -535,9 +469,7 @@ def create_movie_submission(payload):
       flash('Movie ' + movie_title + ' was successfully listed!')
     
     return render_template('pages/home.html')
-  
-  else:
-    abort(AuthError)
+
 
 
 #  Update MOVIE
@@ -545,11 +477,7 @@ def create_movie_submission(payload):
 
 # uses 2 methods; edit/get to load preexisting data, and edit/post to post changes made
 @app.route('/movies/<int:movie_id>/edit', methods=['GET'])
-@requires_auth('patch:movies')
-def edit_movie(payload, movie_id):
-  if 'patch:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/edit FORM GET *****')
-    print(payload['permissions'])
+def edit_movie(movie_id):
 
     form = MovieForm()
     movie_to_edit = Movie.query.get(movie_id)
@@ -585,17 +513,11 @@ def edit_movie(payload, movie_id):
 
     return render_template('forms/edit_movie.html', form=form, movie=movie_data)
   
-  else:
-    abort(AuthError)
 
 
 
 @app.route('/movies/<int:movie_id>/edit', methods=['POST'])
-@requires_auth('patch:movies')
-def edit_movie_submission(payload, movie_id):
-  if 'patch:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/edit FORM POST *****')
-    print(payload['permissions'])
+def edit_movie_submission(movie_id):
 
     error = False
     form = MovieForm(request.form)
@@ -629,8 +551,6 @@ def edit_movie_submission(payload, movie_id):
 
     return redirect(url_for('show_movie', movie_id = movie_id))
   
-  else:
-    abort(AuthError)
 
 
 
@@ -638,11 +558,7 @@ def edit_movie_submission(payload, movie_id):
 #  ----------------------------------------------------------------
 
 @app.route('/movies/<int:movie_id>/delete', methods = ['GET'])
-@requires_auth('delete:movies')
-def delete_movie(payload, movie_id):
-  if 'delete:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/delete *****')
-    print(payload['permissions'])
+def delete_movie(movie_id):
 
     error = False
     try:
@@ -662,9 +578,7 @@ def delete_movie(payload, movie_id):
       flash('Movie successfully deleted.')
 
     return render_template('pages/home.html')
-  
-  else:
-    abort(AuthError)
+
 
 
 #  ----------------------------------------------------------------
@@ -675,25 +589,15 @@ def delete_movie(payload, movie_id):
 #  ----------------------------------------------------------------
 
 @app.route('/showings/create', methods=['GET'])
-@requires_auth('post:showings')
-def create_showing_form(payload):
-  if 'post:showings' in payload['permissions']:
-    print('**** payload deeeets /showings/create GET FORM *****')
-    print(payload['permissions'])
+def create_showing_form():
     form = ShowingForm()
 
     return render_template('forms/new_showing.html', form = form)
-  
-  else:
-    abort(AuthError)
+
 
 
 @app.route('/showings/create', methods=['POST'])
-@requires_auth('post:showings')
-def create_showing_submission(payload):
-  if 'post:showings' in payload['permissions']:
-    print('**** payload deeeets /showings/create POST FORM *****')
-    print(payload['permissions'])
+def create_showing_submission():
 
     error = False
 
@@ -721,19 +625,13 @@ def create_showing_submission(payload):
       flash('An error occured. Showing NOT created.')
 
     return render_template('pages/home.html')
-  
-  else:
-    abort(AuthError)
+
 
 
 #  Show ALL SHOWINGS
 #  ----------------------------------------------------------------
 @app.route('/showings', methods=['GET'])
-@requires_auth('get:showings')
-def showings(payload):
-  if 'get:showings' in payload['permissions']:
-    print('**** payload deeeets /showings *****')
-    print(payload['permissions'])
+def showings():
 
     showings = Showing.query.all()
 
@@ -755,9 +653,6 @@ def showings(payload):
       all_showings.append(this_showing)
 
     return render_template('pages/showings.html', showings = all_showings)
-  
-  else:
-    abort(AuthError)
 
 
 

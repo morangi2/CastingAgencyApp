@@ -1,10 +1,11 @@
 #----------------------------------------------------------------------------#
 # Imports
 #----------------------------------------------------------------------------#
+import os
+from flask import Blueprint, Flask
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask import Flask
 from auth.views import auth_bp
 
 app = Flask(__name__) #in app.py = OK
@@ -14,6 +15,7 @@ db = SQLAlchemy(app) #in models.py = OK
 migrate = Migrate(app, db) #in manage.py + manager == OK
 
 app.register_blueprint(auth_bp, url_prefix='/')
+
 
 class Actor(db.Model):
    __tablename__ = 'actors'

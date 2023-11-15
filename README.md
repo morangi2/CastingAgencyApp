@@ -18,10 +18,10 @@ source setup.sh
 - ensure your postgress server is running
 - use the commands below to start the app
 ```
-export FLASK_APP=myapp
+export FLASK_APP=app
 export FLASK_DEBUG=true
 export FLASK_ENV=development # enables debug mode
-python3 app.py
+flask run
 ```
 
 
