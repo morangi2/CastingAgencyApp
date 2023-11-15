@@ -1,11 +1,7 @@
-from flask import jsonify
-import pytest
 import app_api as app_api
-import shapes as shapes
 from models import *
 import json
 import unittest
-
 
 
 # _______________________________________
@@ -41,5 +37,4 @@ class TestCastingAgencyMethods(unittest.TestCase):
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
-
 
