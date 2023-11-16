@@ -5,7 +5,7 @@
 import datetime
 import dateutil.parser
 import babel
-from flask import abort, jsonify, render_template, request, flash, redirect, url_for
+from flask import abort, jsonify, render_template, request, flash
 #from markupsafe import Markup
 import logging
 from logging import Formatter, FileHandler
@@ -28,7 +28,6 @@ from auth.decorators import AuthError
 #----------------------------------------------------------------------------#
 
 
-
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
   if format == 'full':
@@ -49,8 +48,7 @@ def index():
   if excited == 'true':
     print("***EXCITED is true!!********")
     print(os.environ['DATABASE_URL'])
-  #token = get_token_auth_header()
-  #session['user'] = token
+
   return render_template('pages/home.html')
 
 # test connection and local setup
@@ -62,6 +60,7 @@ def hello():
        }
     ) 
 
+
 #  ----------------------------------------------------------------
 #  ACTORS
 #  ----------------------------------------------------------------
@@ -70,30 +69,36 @@ def hello():
 #  ----------------------------------------------------------------
 @app.route('/actors')
 def actors():
+
     try:
-        actors_list = Actor.query.distinct('city')
-        actors = []
-        selection = Actor.query.all()
+      actors_list = Actor.query.distinct('city')
+      actors = []
+      selection = Actor.query.all()
 
-        for one_actor in actors_list:
-            actor_data = {}
-            actor_data['city'] = one_actor.city
-            actor_data['state'] = one_actor.state
-            actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
-            actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
-            actors.append(actor_data)
+      for one_actor in actors_list:
+        actor_data = {}
+        """ actor_data['name'] = one_actor.name
+        actor_data['age'] = one_actor.age
+        actor_data['gender'] = one_actor.gender """
+        actor_data['city'] = one_actor.city
+        actor_data['state'] = one_actor.state
+        actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
+        actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
+        actors.append(actor_data)
 
+      print('**** all actors... *****')
+      print(actors)
 
-        return jsonify(
+      return jsonify(
             {
                 "success": True,
                 "total_actors": len(selection)
             }
         )
-
+   
     except Exception as e:
-        print(e)
-        abort(404)
+      print(e)
+      abort(404)
 
 
 #  Show ONE ACTOR
@@ -147,16 +152,16 @@ def show_actor(actor_id):
           actor_selected_data['upcoming_showings_count'] += 1
           actor_selected_data['upcoming_showings'].append(this_showing)
 
-    except:
-      error = True
-      print(sys.exc_info())
-    if error:
-      error = False
-      flash('This actor does NOT exist in our records.')
-      return render_template('pages/home.html')
+    except Exception as e:
+      print(e)
+      abort(404)
     
-    return render_template('pages/show_actor.html', actor=actor_selected_data)
-
+    return jsonify(
+            {
+                "success": True,
+                "current_actor": actor_id
+            }
+        )
 
 
 #  Create ACTOR
@@ -164,167 +169,186 @@ def show_actor(actor_id):
 
 @app.route('/actors/create', methods=['GET'])
 def create_actor_form():
-    actor_form = ActorForm()
-    return render_template('forms/new_actor.html', form=actor_form)
+    try:
+        actor_form = ActorForm()
+    except Exception as e:
+        print(e)
+        abort(404)
+    return jsonify(
+            {
+                "success": True,
+                "get_form": True
+            }
+        )
 
 
 @app.route('/actors/create', methods=['POST'])
 def create_actor_submission():
-
-    error = False
     actor_name = ''
 
     try:
-      form = ActorForm(request.form)
-
-      actor = Actor(name = form.name.data,
-                    age = form.age.data,
-                    gender = form.gender.data,
-                    city = form.city.data,
-                    state = form.state.data,
-                    genre = form.genre.data,
-                    instagram_link = form.instagram_link.data,
-                    website_link = form.website_link.data,
-                    image_link = form.image_link.data,
-                    seeking_casting = form.seeking_casting.data,
-                    seeking_description = form.seeking_description.data)
+      body = request.get_json()
+      actor = Actor(name = body.get('name'),
+                    age = body.get('age'),
+                    gender = body.get('gender'),
+                    city = body.get('city'),
+                    state = body.get('state'),
+                    genre = body.get('genre'),
+                    instagram_link = body.get('instagram_link'),
+                    website_link = body.get('website_link'),
+                    image_link = body.get('image_link'),
+                    seeking_casting = body.get('seeking_casting'),
+                    seeking_description = body.get('seeking_description')) 
       
       db.session.add(actor)
       db.session.commit()
 
-      actor_name = form.name.data
+      actor_name = actor.name
+      selection = Actor.query.all()
 
-    except:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+      return jsonify(
+            {
+                "success": True,
+                "total_actors": len(selection),
+                "actor_name": actor_name
+            }
+        )
     
+    except Exception as e:
+        print(e)
+        abort(404)
+
     finally:
       db.session.close()
     
-    if error:
-      error = False
-      print(sys.exc_info())
-      flash('An ERROR occured. Actor ' + actor_name + ' could not be added.')
-    else:
-      flash('Actor ' + actor_name + ' added successfully!')
-
-    return render_template('pages/home.html')
-  
-
 
 #  Update ACTOR
 #  ----------------------------------------------------------------
 
 @app.route('/actors/<int:actor_id>/edit', methods=['GET'])
 def edit_actor(actor_id):
+    try:
+        form = ActorForm()
+        actor_data = {}
+        actor_to_edit = Actor.query.get(actor_id)
 
-    form = ActorForm()
-    actor_data = {}
-    actor_to_edit = Actor.query.get(actor_id)
+        #pass all the actor data
+        actor_data['id'] = actor_to_edit.id
+        actor_data['name'] = actor_to_edit.name
+        actor_data['age'] = actor_to_edit.age
+        actor_data['gender'] = actor_to_edit.gender
+        actor_data['genre'] = actor_to_edit.genre
+        actor_data['city'] = actor_to_edit.city
+        actor_data['state'] = actor_to_edit.state
+        actor_data['image_link'] = actor_to_edit.image_link
+        actor_data['website_link'] = actor_to_edit.website_link
+        actor_data['instagram_link'] = actor_to_edit.instagram_link
+        actor_data['seeking_casting'] = actor_to_edit.seeking_casting
+        actor_data['seeking_description'] = actor_to_edit.seeking_description
 
-    #pass all the actor data
-    actor_data['id'] = actor_to_edit.id
-    actor_data['name'] = actor_to_edit.name
-    actor_data['age'] = actor_to_edit.age
-    actor_data['gender'] = actor_to_edit.gender
-    actor_data['genre'] = actor_to_edit.genre
-    actor_data['city'] = actor_to_edit.city
-    actor_data['state'] = actor_to_edit.state
-    actor_data['image_link'] = actor_to_edit.image_link
-    actor_data['website_link'] = actor_to_edit.website_link
-    actor_data['instagram_link'] = actor_to_edit.instagram_link
-    actor_data['seeking_casting'] = actor_to_edit.seeking_casting
-    actor_data['seeking_description'] = actor_to_edit.seeking_description
+        #populate the form with existing actor data
+        form.name.data = actor_to_edit.name
+        form.age.data = actor_to_edit.age
+        form.gender.data = actor_to_edit.gender
+        form.genre.data = actor_to_edit.genre
+        form.city.data = actor_to_edit.city
+        form.state.data = actor_to_edit.state
+        form.image_link.data = actor_to_edit.image_link
+        form.instagram_link.data = actor_to_edit.instagram_link
+        form.website_link.data = actor_to_edit.website_link
+        form.seeking_casting.data = actor_to_edit.seeking_casting
+        form.seeking_description.data = actor_to_edit.seeking_description
 
-    print('****CASTING SEEKING EDIT/GET******')
-    print(actor_to_edit.seeking_casting)
+        print('****CASTING SEEKING EDIT/POST/form display******')
+        print(form.seeking_casting.data)
 
-    #populate the form with existing actor data
-    form.name.data = actor_to_edit.name
-    form.age.data = actor_to_edit.age
-    form.gender.data = actor_to_edit.gender
-    form.genre.data = actor_to_edit.genre
-    form.city.data = actor_to_edit.city
-    form.state.data = actor_to_edit.state
-    form.image_link.data = actor_to_edit.image_link
-    form.instagram_link.data = actor_to_edit.instagram_link
-    form.website_link.data = actor_to_edit.website_link
-    form.seeking_casting.data = actor_to_edit.seeking_casting
-    form.seeking_description.data = actor_to_edit.seeking_description
+    except Exception as e:
+       print(e)
+       abort(404)
 
-    print('****CASTING SEEKING EDIT/POST/form display******')
-    print(form.seeking_casting.data)
-
-    return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
-
-
+    return jsonify(
+       {
+          "success": True,
+          "get_form": True,
+          "actor_id": actor_data['id']
+       }
+    )
 
 
 @app.route('/actors/<int:actor_id>/edit', methods=['POST'])
 def edit_actor_submission(actor_id):
-    error = False
 
     try:
       #actor to edit
       actor_edit = Actor.query.get(actor_id)
-      #form details
-      form = ActorForm(request.form)
 
-      actor_edit.name = form.name.data
-      actor_edit.age = form.age.data
-      actor_edit.gender = form.gender.data
-      actor_edit.genre = form.genre.data
-      actor_edit.city = form.city.data
-      actor_edit.state = form.state.data
-      actor_edit.instagram_link = form.instagram_link.data
-      actor_edit.website_link = form.website_link.data
-      actor_edit.image_link = form.image_link.data
-      actor_edit.seeking_casting = form.seeking_casting.data
-      actor_edit.seeking_description = form.seeking_description.data
+      body = request.get_json()
+
+
+      actor_edit.name = body.get('name')
+      actor_edit.age = body.get('age')
+      actor_edit.gender = body.get('gender')
+      actor_edit.genre = body.get('genre')
+      actor_edit.city = body.get('city')
+      actor_edit.state = body.get('state')
+      actor_edit.instagram_link = body.get('instagram_link')
+      actor_edit.website_link = body.get('website_link')
+      actor_edit.image_link = body.get('image_link')
+      actor_edit.seeking_casting = body.get('seeking_casting')
+      actor_edit.seeking_description = body.get('seeking_description')
+
 
       print('****CASTING SEEKING EDIT/POST******')
-      print(form.seeking_casting.data)
+      print(body.get('seeking_casting'))
       db.session.commit()
-    except:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+
+    except Exception as e:
+      print(e)
+      abort(404)
+      
     finally:
       db.session.close()
-    if error:
-      error = False
-      flash('Edit was UNSUCCESSFUL! Please try again.')
-      abort(404)
-    else:
-      flash('Edit was successful!')
 
-    return redirect(url_for('show_actor', actor_id = actor_id))
+    return jsonify(
+       {
+          "success": True,
+          "actor_id": actor_id
+       }
+    )
   
 
 
 #  Delete ACTOR
 #  ----------------------------------------------------------------
-@app.route('/actors/<int:actor_id>/delete', methods=['GET'])
+@app.route('/actors/<int:actor_id>/delete', methods=['DELETE'])
 def delete_actor(actor_id):
 
-    error = False
-
     try:
-      Actor.query.filter_by(id = actor_id).delete()
-      db.session.commit()
-    except:
-      error = True
-      db.session.rollback()
-    finally:
-      db.session.close()
-      flash('Actor successfully deleted!')
-    if error:
-      error = False
-      flash('An error occured. Venue not deleted.')
-      abort(404)
+        actor_to_delete = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
-    return redirect(url_for('index'))
+        if actor_to_delete is None:
+            abort(422)
+        else:  
+            Actor.query.filter_by(id = actor_id).delete()
+            db.session.commit()
+            sselection = Actor.query.all()
+
+        return jsonify(
+            {
+                "success": True,
+                "deleted_actor_id": actor_id,
+                "total_actors": len(sselection)
+            })
+    
+    except Exception as e:
+        print(e)
+        abort(405)
+
+    finally:
+       db.session.close()
+    
+
+    
 
 
 
@@ -339,29 +363,26 @@ def delete_actor(actor_id):
 def movies():
 
     try:
-      all_movies = Movie.query.all()
-      movie_data = []
-      selection = Movie.query.all()
-      status_metadata = {
-        "success": True,
-        "total_actors": len(selection)
-      }
+        all_movies = Movie.query.all()
+        movie_data = []
+        selection = Movie.query.all()
 
-      for movie in all_movies:
-        movie_formatted = {}
-        movie_formatted['id'] = movie.id
-        movie_formatted['title'] = movie.title
-        movie_data.append(movie_formatted)
+        for movie in all_movies:
+            movie_formatted = {}
+            movie_formatted['id'] = movie.id
+            movie_formatted['title'] = movie.title
+            movie_data.append(movie_formatted)
 
-      movie_data.append(status_metadata)
+        return jsonify(
+           {
+              "success": True,
+              "total_movies": len(selection)
+           }
+        )
 
-      print('**** all movies... *****')
-      print(movie_data)
-      return render_template('pages/movies.html', movies = movie_data)
-    
     except Exception as e:
-      print(e)
-      abort(404)
+        print(e)
+        abort(404)
   
 
 
@@ -371,58 +392,55 @@ def movies():
 @app.route('/movies/<int:movie_id>')
 def show_movie(movie_id):
 
-    error = False
-
     try:
-      movie_selected = Movie.query.get(movie_id)
-      showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
+        movie_selected = Movie.query.get(movie_id)
+        showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
 
-      movie_selected_data = {}
+        movie_selected_data = {}
 
-      movie_selected_data['id'] = movie_selected.id
-      movie_selected_data['title'] = movie_selected.title
-      movie_selected_data['release_date'] = movie_selected.release_date
-      movie_selected_data['genre'] = movie_selected.genre
-      movie_selected_data['website_link'] = movie_selected.website_link
-      movie_selected_data['instagram_link'] = movie_selected.instagram_link
-      movie_selected_data['image_link'] = movie_selected.image_link
-      movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
-      movie_selected_data['seeking_description'] = movie_selected.seeking_description
-      movie_selected_data['past_showings'] = []
-      movie_selected_data['upcoming_showings'] = []
-      movie_selected_data['past_showings_count'] = 0
-      movie_selected_data['upcoming_showings_count'] = 0
+        movie_selected_data['id'] = movie_selected.id
+        movie_selected_data['title'] = movie_selected.title
+        movie_selected_data['release_date'] = movie_selected.release_date
+        movie_selected_data['genre'] = movie_selected.genre
+        movie_selected_data['website_link'] = movie_selected.website_link
+        movie_selected_data['instagram_link'] = movie_selected.instagram_link
+        movie_selected_data['image_link'] = movie_selected.image_link
+        movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
+        movie_selected_data['seeking_description'] = movie_selected.seeking_description
+        movie_selected_data['past_showings'] = []
+        movie_selected_data['upcoming_showings'] = []
+        movie_selected_data['past_showings_count'] = 0
+        movie_selected_data['upcoming_showings_count'] = 0
 
-      for showing in showings_joinedwith_actors:
-        this_showing = {}
-        this_showing['actor_id'] = showing.actor_id
-        this_showing['actor_name'] = showing.actor.name
-        this_showing['actor_image_link'] = showing.actor.image_link
-        this_showing['start_time'] = showing.start_time
+        for showing in showings_joinedwith_actors:
+            this_showing = {}
+            this_showing['actor_id'] = showing.actor_id
+            this_showing['actor_name'] = showing.actor.name
+            this_showing['actor_image_link'] = showing.actor.image_link
+            this_showing['start_time'] = showing.start_time
 
-        showing_start_time = showing.start_time
-        showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
-        timestamp_db = datetime.timestamp(showing_start_time_formatted)
-        timestamp_current = time.time()
+            showing_start_time = showing.start_time
+            showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+            timestamp_db = datetime.timestamp(showing_start_time_formatted)
+            timestamp_current = time.time()
 
         if timestamp_current > timestamp_db:
-          movie_selected_data['past_showings'].append(this_showing)
-          movie_selected_data['past_showings_count'] += 1
+            movie_selected_data['past_showings'].append(this_showing)
+            movie_selected_data['past_showings_count'] += 1
         else:
-          movie_selected_data['upcoming_showings'].append(this_showing)
-          movie_selected_data['upcoming_showings_count'] += 1
+            movie_selected_data['upcoming_showings'].append(this_showing)
+            movie_selected_data['upcoming_showings_count'] += 1
 
-    except:
-      error = True
-      print(sys.exc_info())
-    if error:
-      error = False
-      flash('This Movie does NOT exist in our records.')
+        return jsonify(
+           {
+              "success": True,
+              "current_movie": movie_id
+           }
+        )
+
+    except Exception as e:
+      print(e)
       abort(404)
-    
-    return render_template('pages/show_movie.html', movie = movie_selected_data)
-
-
 
 
 #  Create MOVIE
@@ -431,45 +449,52 @@ def show_movie(movie_id):
 #2 methods for /movies/create route: get the form, then post the entry
 @app.route('/movies/create', methods=['GET'])
 def create_movie_form():
-    form = MovieForm()
-
-    return render_template('forms/new_movie.html', form = form)
-  
-
+    try:
+        form = MovieForm()
+        return jsonify(
+           {
+              "success": True,
+              "get_form": True
+           }
+        )
+    except Exception as e:
+       print(e)
+       abort(404)
+    
 
 @app.route('/movies/create', methods=['POST'])
 def create_movie_submission():
-    error = False
     movie_title = ''
 
-    try:
-      form = MovieForm(request.form)
-      movie = Movie(title = form.title.data,
-                    release_date = form.release_date.data,
-                    genre = form.genre.data,
-                    website_link = form.website_link.data,
-                    image_link = form.image_link.data,
-                    instagram_link = form.instagram_link.data,
-                    seeking_actors = form.seeking_actors.data,
-                    seeking_description = form.seeking_description.data)
+    try: 
+        body = request.get_json()
+        movie = Movie(title = body.get('title'),
+                    release_date = body.get('release_date'),
+                    genre = body.get('genre'),
+                    website_link = body.get('website_link'),
+                    image_link = body.get('image_link'),
+                    instagram_link = body.get('instagram_link'),
+                    seeking_actors = body.get('seeking_actors'),
+                    seeking_description = body.get('seeking_description')) 
       
-      movie_title = form.title.data
-      db.session.add(movie)
-      db.session.commit()
-    except:
-      error = True
-      db.session.rollback()
-      flash('ERROR: Movie was not added to our records.')
-    finally:
-      db.session.close()
-    if error:
-      error = False
-      print(sys.exc_info())
-    else:
-      flash('Movie ' + movie_title + ' was successfully listed!')
-    
-    return render_template('pages/home.html')
+        movie_title = body.get('title')
+        
+        db.session.add(movie)
+        db.session.commit()
+        selection = Movie.query.all()
 
+        return jsonify(
+           {
+              "success": True,
+              "total_movies": len(selection),
+              "new_movie_name": movie_title
+           }
+        )
+    except Exception as e:
+        print(e)
+        abort(404)
+    finally:
+        db.session.close()
 
 
 #  Update MOVIE
@@ -479,106 +504,109 @@ def create_movie_submission():
 @app.route('/movies/<int:movie_id>/edit', methods=['GET'])
 def edit_movie(movie_id):
 
-    form = MovieForm()
-    movie_to_edit = Movie.query.get(movie_id)
-    print('*******MOVIE TO EDIT *******')
+    try:
+        form = MovieForm()
+        movie_to_edit = Movie.query.get(movie_id)
+        
+        movie_data = {}
+
+        #load movie object
+        movie_data['id'] = movie_to_edit.id
+        movie_data['title'] = movie_to_edit.title
+        movie_data['release_date'] = movie_to_edit.release_date
+        movie_data['genre'] = movie_to_edit.genre
+        movie_data['website_link'] = movie_to_edit.website_link
+        movie_data['instagram_link'] = movie_to_edit.instagram_link
+        movie_data['image_link'] = movie_to_edit.image_link
+        movie_data['seeking_actors'] = movie_to_edit.seeking_actors
+        movie_data['seeking_description'] = movie_to_edit.seeking_description
+
+
+        #load form object
+        form.title.data = movie_to_edit.title
+        form.release_date.data = movie_to_edit.release_date
+        form.genre.data = movie_to_edit.genre
+        form.website_link.data = movie_to_edit.website_link
+        form.image_link.data = movie_to_edit.image_link
+        form.instagram_link.data = movie_to_edit.instagram_link
+        form.seeking_actors.data = movie_to_edit.seeking_actors
+        form.seeking_description.data = movie_to_edit.seeking_description
+
+        return jsonify(
+           {
+              "success": True,
+              "get_form": True,
+              "movie_id": movie_id
+           }
+        )
     
-    movie_data = {}
-
-    #load movie object
-    movie_data['id'] = movie_to_edit.id
-    movie_data['title'] = movie_to_edit.title
-    movie_data['release_date'] = movie_to_edit.release_date
-    movie_data['genre'] = movie_to_edit.genre
-    movie_data['website_link'] = movie_to_edit.website_link
-    movie_data['instagram_link'] = movie_to_edit.instagram_link
-    movie_data['image_link'] = movie_to_edit.image_link
-    movie_data['seeking_actors'] = movie_to_edit.seeking_actors
-    movie_data['seeking_description'] = movie_to_edit.seeking_description
-
-
-    #load form object
-    form.title.data = movie_to_edit.title
-    form.release_date.data = movie_to_edit.release_date
-    form.genre.data = movie_to_edit.genre
-    form.website_link.data = movie_to_edit.website_link
-    form.image_link.data = movie_to_edit.image_link
-    form.instagram_link.data = movie_to_edit.instagram_link
-    form.seeking_actors.data = movie_to_edit.seeking_actors
-    form.seeking_description.data = movie_to_edit.seeking_description
-
-    print('*******RELEASE DATE*******')
-    print(type(form.release_date.data))
+    except Exception as e:
+       print(e)
+       abort(404)
   
-
-    return render_template('forms/edit_movie.html', form=form, movie=movie_data)
-  
-
-
 
 @app.route('/movies/<int:movie_id>/edit', methods=['POST'])
 def edit_movie_submission(movie_id):
 
-    error = False
-    form = MovieForm(request.form)
-
     try:
-      movie_to_edit = Movie.query.get(movie_id)
+        movie_to_edit = Movie.query.get(movie_id)
+        body = request.get_json()
+      
+        movie_to_edit.title = body.get('title')
+        movie_to_edit.release_date = body.get('release_date')
+        movie_to_edit.genre = body.get('genre')
+        movie_to_edit.website_link = body.get('website_link')
+        movie_to_edit.image_link = body.get('image_link')
+        movie_to_edit.instagram_link = body.get('instagram_link')
+        movie_to_edit.seeking_actors = body.get('seeking_actors')
+        movie_to_edit.seeking_description = body.get('seeking_description')
 
-      movie_to_edit.title = form.title.data
-      movie_to_edit.release_date = form.release_date.data
-      movie_to_edit.genre = form.genre.data
-      movie_to_edit.website_link = form.website_link.data
-      movie_to_edit.image_link = form.image_link.data
-      movie_to_edit.instagram_link = form.instagram_link.data
-      movie_to_edit.seeking_actors = form.seeking_actors.data
-      movie_to_edit.seeking_description = form.seeking_description.data
+        db.session.commit()
 
-      db.session.commit()
+        return jsonify(
+            {
+                "success": True,
+                "movie_id": movie_id
+            })
 
-    except:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+    except Exception as e:
+      print(e)
+      abort(404)
     finally:
       db.session.close()
-    if error:
-      error = False
-      flash('an error occured, edit unsuccessful.')
-      abort(500)
-    else:
-      flash('edit was successfull!')
-
-    return redirect(url_for('show_movie', movie_id = movie_id))
-  
-
 
 
 #  Delete MOVIE
 #  ----------------------------------------------------------------
 
-@app.route('/movies/<int:movie_id>/delete', methods = ['GET'])
+@app.route('/movies/<int:movie_id>/delete', methods = ['DELETE'])
 def delete_movie(movie_id):
 
-    error = False
     try:
-      Movie.query.filter_by(id = movie_id).delete()
-      db.session.commit()
-    except:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+        movie_to_delete = Movie.query.filter(Movie.id == movie_id).one_or_none()
+        if movie_to_delete is None:
+            print('hakuna movie****')
+            abort(422)
+
+        else:
+            Movie.query.filter_by(id = movie_id).delete()
+            db.session.commit()
+            selection = Movie.query.all()
+
+        return jsonify(
+           {
+              "success": True,
+              "deleted_movie_id": movie_id,
+              "total_movies": len(selection)
+           }
+        )
+    
+    except Exception as e:
+      print(e)
+      abort(405)
+
     finally:
       db.session.close()
-    if error:
-      error = False
-      flash('An error occured. Deletion not successful.')
-      abort(404)
-    else:
-      flash('Movie successfully deleted.')
-
-    return render_template('pages/home.html')
-
 
 
 #  ----------------------------------------------------------------
@@ -599,93 +627,125 @@ def create_showing_form():
 @app.route('/showings/create', methods=['POST'])
 def create_showing_submission():
 
-    error = False
-
     try:
-      form = ShowingForm(request.form)
+        body = request.get_json()
 
-      showing_created = Showing(actor_id = form.actor_id.data,
-                                movie_id = form.movie_id.data,
-                                start_time = form.start_time.data)
+        showing_created = Showing(actor_id = body.get('actor_id'),
+                                  movie_id = body.get('movie_id'),
+                                  start_time = body.get('start_time'))
       
-      db.session.add(showing_created)
-      db.session.commit()
+        showing_lead_actor_id = body.get('actor_id')
 
-    except:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+        db.session.add(showing_created)
+        db.session.commit()
+        selection = Showing.query.all()
+
+        return jsonify(
+           {
+              "success": True,
+              "total_showings": len(selection),
+              "showing_lead_actor_id": showing_lead_actor_id
+           }
+        )
+
+    except Exception as e:
+        print(e)
+        abort(404)
 
     finally:
       db.session.close()
-      flash('Showing successfully added!')
-
-    if error:
-      error = False
-      flash('An error occured. Showing NOT created.')
-
-    return render_template('pages/home.html')
-
 
 
 #  Show ALL SHOWINGS
 #  ----------------------------------------------------------------
 @app.route('/showings', methods=['GET'])
 def showings():
+    try:
+        showings = Showing.query.order_by(Showing.id).all()
 
-    showings = Showing.query.all()
+        all_showings = []
 
-    all_showings = []
+        for showing in showings:
+            this_showing = {}
+            movie_details = Movie.query.filter_by(id = showing.movie_id).one_or_none()
+            actor_details = Actor.query.filter_by(id = showing.actor_id).one_or_none()
 
-    for showing in showings:
-      this_showing = {}
-      movie_details = Movie.query.filter_by(id = showing.movie_id).one_or_none()
-      actor_details = Actor.query.filter_by(id = showing.actor_id).one_or_none()
+            this_showing['id'] = showing.id
+            this_showing['actor_id'] = showing.actor_id
+            this_showing['movie_id'] = showing.movie_id
+            this_showing['start_time'] = showing.start_time
+            this_showing['movie_title'] = movie_details.title
+            this_showing['actor_name'] = actor_details.name
+            this_showing['movie_image_link'] = movie_details.image_link
 
-      this_showing['id'] = showing.id
-      this_showing['actor_id'] = showing.actor_id
-      this_showing['movie_id'] = showing.movie_id
-      this_showing['start_time'] = showing.start_time
-      this_showing['movie_title'] = movie_details.title
-      this_showing['actor_name'] = actor_details.name
-      this_showing['movie_image_link'] = movie_details.image_link
+            all_showings.append(this_showing)
 
-      all_showings.append(this_showing)
-
-    return render_template('pages/showings.html', showings = all_showings)
-
-
-
+        return jsonify(
+           {
+              "success": True,
+              "total_showings": len(showings)
+           }
+        )
+    
+    except Exception as e:
+       print(e)
+       abort(404)
 
 
+
+# -------------------------------------------------------------------
+#  error handlers
+# -------------------------------------------------------------------
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify(
+        {
+            "error": 400,
+            "message": "Bad Request",
+            "success": False
+        }
+    )
+
+@app.errorhandler(422)
+def unprocessable_entity(error):
+    print('***** 422 ERROR ******')
+    print(error)
+
+    return jsonify(
+        {
+            "error": 422,
+            "message": "Unprocessable Entity",
+            "success": False
+        }
+    )
 
 
 @app.errorhandler(404)
-def not_found_error(error):
-    return render_template('errors/404.html'), 404
+def bad_request(error):
+    return jsonify(
+        {
+            "error": 404,
+            "message": "Resource Not Found",
+            "success": False
+        }
+    )
 
 @app.errorhandler(500)
-def server_error(error):
-    return render_template('errors/500.html'), 500
+def bad_request(error):
+    return jsonify(
+        {
+            "error": 500,
+            "message": "Internal Server Error",
+            "success": False
+        }
+    )
 
 # -------------------------------------------------------------------
-# implement error handler for AuthError
+#  error handler for AuthError
 # -------------------------------------------------------------------
-@app.errorhandler(AuthError)
-def auth_error(error):
-    print('***** AUTH ERROR ******')
-    print(error)
 
-    error_details = {}
-
-    error_details['success'] = False
-    error_details['error'] = error.status_code
-    error_details['message'] = error.error.get('description')
-    error_details['developer_code'] = error.error.get('code')
-
-    return render_template('errors/autherror.html', error_details = error_details)
-
-""" 
 @app.errorhandler(AuthError)
 def auth_error(error):
   print('***** AUTH ERROR ******')
@@ -698,7 +758,7 @@ def auth_error(error):
       "message": error.error.get('description')
     }
   ), error.status_code
-"""
+
 
 if not app.debug:
     file_handler = FileHandler('error.log')
