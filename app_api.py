@@ -16,12 +16,9 @@ import os
 from auth.decorators import AuthError
 #----------------------------------------------------------------------------#
 # App Config.
-# TODO: Refactored to file models.py == DONE
+# NOTE: Refactored to file models.py == DONE
 
-#----------------------------------------------------------------------------#
-# TODO: connect to a local postgresql database == DONE
-#----------------------------------------------------------------------------
-#----------------------------------------------------------------------------#
+
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -42,14 +39,12 @@ app.jinja_env.filters['datetime'] = format_datetime
 # Controllers.
 #----------------------------------------------------------------------------#
 
-@app.route('/')
-def index():
-  excited = os.environ['EXCITED']
-  if excited == 'true':
-    print("***EXCITED is true!!********")
-    print(os.environ['DATABASE_URL'])
 
-  return render_template('pages/home.html')
+
+
+#----------------------------------------------------------------------------#
+# TEST CONNECTION AND LOCAL SETUP.
+#----------------------------------------------------------------------------#
 
 # test connection and local setup
 @app.route("/hello")
@@ -59,6 +54,24 @@ def hello():
           "greeting": "Hello Mercy"
        }
     ) 
+
+
+
+
+#----------------------------------------------------------------------------#
+# HOME or INDEX.
+#----------------------------------------------------------------------------#
+
+@app.route('/')
+def index():
+  excited = os.environ['EXCITED']
+  if excited == 'true':
+    print("***EXCITED is true!!********")
+    print(os.environ['DATABASE_URL'])
+
+  return render_template('pages/home.html')
+
+
 
 
 #  ----------------------------------------------------------------
@@ -86,9 +99,6 @@ def actors():
         actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
         actors.append(actor_data)
 
-      print('**** all actors... *****')
-      print(actors)
-
       return jsonify(
             {
                 "success": True,
@@ -105,8 +115,6 @@ def actors():
 #  ----------------------------------------------------------------
 @app.route('/actors/<int:actor_id>')
 def show_actor(actor_id):
-
-    error = False
 
     try:
       actor_selected_data = {}
@@ -166,7 +174,6 @@ def show_actor(actor_id):
 
 #  Create ACTOR
 #  ----------------------------------------------------------------
-
 @app.route('/actors/create', methods=['GET'])
 def create_actor_form():
     try:
@@ -224,55 +231,54 @@ def create_actor_submission():
 
 #  Update ACTOR
 #  ----------------------------------------------------------------
-
 @app.route('/actors/<int:actor_id>/edit', methods=['GET'])
 def edit_actor(actor_id):
     try:
         form = ActorForm()
-        actor_data = {}
         actor_to_edit = Actor.query.get(actor_id)
 
-        #pass all the actor data
-        actor_data['id'] = actor_to_edit.id
-        actor_data['name'] = actor_to_edit.name
-        actor_data['age'] = actor_to_edit.age
-        actor_data['gender'] = actor_to_edit.gender
-        actor_data['genre'] = actor_to_edit.genre
-        actor_data['city'] = actor_to_edit.city
-        actor_data['state'] = actor_to_edit.state
-        actor_data['image_link'] = actor_to_edit.image_link
-        actor_data['website_link'] = actor_to_edit.website_link
-        actor_data['instagram_link'] = actor_to_edit.instagram_link
-        actor_data['seeking_casting'] = actor_to_edit.seeking_casting
-        actor_data['seeking_description'] = actor_to_edit.seeking_description
+        if actor_to_edit is None:
+           abort(404)
+        else:
+            actor_data = {}
 
-        #populate the form with existing actor data
-        form.name.data = actor_to_edit.name
-        form.age.data = actor_to_edit.age
-        form.gender.data = actor_to_edit.gender
-        form.genre.data = actor_to_edit.genre
-        form.city.data = actor_to_edit.city
-        form.state.data = actor_to_edit.state
-        form.image_link.data = actor_to_edit.image_link
-        form.instagram_link.data = actor_to_edit.instagram_link
-        form.website_link.data = actor_to_edit.website_link
-        form.seeking_casting.data = actor_to_edit.seeking_casting
-        form.seeking_description.data = actor_to_edit.seeking_description
+            #pass all the actor data
+            actor_data['id'] = actor_to_edit.id
+            actor_data['name'] = actor_to_edit.name
+            actor_data['age'] = actor_to_edit.age
+            actor_data['gender'] = actor_to_edit.gender
+            actor_data['genre'] = actor_to_edit.genre
+            actor_data['city'] = actor_to_edit.city
+            actor_data['state'] = actor_to_edit.state
+            actor_data['image_link'] = actor_to_edit.image_link
+            actor_data['website_link'] = actor_to_edit.website_link
+            actor_data['instagram_link'] = actor_to_edit.instagram_link
+            actor_data['seeking_casting'] = actor_to_edit.seeking_casting
+            actor_data['seeking_description'] = actor_to_edit.seeking_description
 
-        print('****CASTING SEEKING EDIT/POST/form display******')
-        print(form.seeking_casting.data)
+            #populate the form with existing actor data
+            form.name.data = actor_to_edit.name
+            form.age.data = actor_to_edit.age
+            form.gender.data = actor_to_edit.gender
+            form.genre.data = actor_to_edit.genre
+            form.city.data = actor_to_edit.city
+            form.state.data = actor_to_edit.state
+            form.image_link.data = actor_to_edit.image_link
+            form.instagram_link.data = actor_to_edit.instagram_link
+            form.website_link.data = actor_to_edit.website_link
+            form.seeking_casting.data = actor_to_edit.seeking_casting
+            form.seeking_description.data = actor_to_edit.seeking_description
+
+            return jsonify(
+                {
+                    "success": True,
+                    "get_form": True,
+                    "actor_id": actor_data['id']
+                })
 
     except Exception as e:
        print(e)
        abort(404)
-
-    return jsonify(
-       {
-          "success": True,
-          "get_form": True,
-          "actor_id": actor_data['id']
-       }
-    )
 
 
 @app.route('/actors/<int:actor_id>/edit', methods=['POST'])
@@ -281,26 +287,24 @@ def edit_actor_submission(actor_id):
     try:
       #actor to edit
       actor_edit = Actor.query.get(actor_id)
-
       body = request.get_json()
 
+      if actor_edit is None:
+        abort(404)
+      else:
+        actor_edit.name = body.get('name')
+        actor_edit.age = body.get('age')
+        actor_edit.gender = body.get('gender')
+        actor_edit.genre = body.get('genre')
+        actor_edit.city = body.get('city')
+        actor_edit.state = body.get('state')
+        actor_edit.instagram_link = body.get('instagram_link')
+        actor_edit.website_link = body.get('website_link')
+        actor_edit.image_link = body.get('image_link')
+        actor_edit.seeking_casting = body.get('seeking_casting')
+        actor_edit.seeking_description = body.get('seeking_description')
 
-      actor_edit.name = body.get('name')
-      actor_edit.age = body.get('age')
-      actor_edit.gender = body.get('gender')
-      actor_edit.genre = body.get('genre')
-      actor_edit.city = body.get('city')
-      actor_edit.state = body.get('state')
-      actor_edit.instagram_link = body.get('instagram_link')
-      actor_edit.website_link = body.get('website_link')
-      actor_edit.image_link = body.get('image_link')
-      actor_edit.seeking_casting = body.get('seeking_casting')
-      actor_edit.seeking_description = body.get('seeking_description')
-
-
-      print('****CASTING SEEKING EDIT/POST******')
-      print(body.get('seeking_casting'))
-      db.session.commit()
+        db.session.commit()
 
     except Exception as e:
       print(e)
@@ -349,22 +353,19 @@ def delete_actor(actor_id):
 
     
 
-
-
 #  ----------------------------------------------------------------
 #  MOVIES
 #  ----------------------------------------------------------------
 
+
 #  Show ALL MOVIES
 #  ----------------------------------------------------------------
-
 @app.route('/movies')
 def movies():
 
     try:
         all_movies = Movie.query.all()
         movie_data = []
-        selection = Movie.query.all()
 
         for movie in all_movies:
             movie_formatted = {}
@@ -375,7 +376,7 @@ def movies():
         return jsonify(
            {
               "success": True,
-              "total_movies": len(selection)
+              "total_movies": len(all_movies)
            }
         )
 
@@ -384,10 +385,8 @@ def movies():
         abort(404)
   
 
-
 #  Show ONE MOVIE
 #  ----------------------------------------------------------------
-
 @app.route('/movies/<int:movie_id>')
 def show_movie(movie_id):
 
@@ -423,12 +422,12 @@ def show_movie(movie_id):
             timestamp_db = datetime.timestamp(showing_start_time_formatted)
             timestamp_current = time.time()
 
-        if timestamp_current > timestamp_db:
-            movie_selected_data['past_showings'].append(this_showing)
-            movie_selected_data['past_showings_count'] += 1
-        else:
-            movie_selected_data['upcoming_showings'].append(this_showing)
-            movie_selected_data['upcoming_showings_count'] += 1
+            if timestamp_current > timestamp_db:
+                movie_selected_data['past_showings'].append(this_showing)
+                movie_selected_data['past_showings_count'] += 1
+            else:
+                movie_selected_data['upcoming_showings'].append(this_showing)
+                movie_selected_data['upcoming_showings_count'] += 1
 
         return jsonify(
            {
@@ -477,7 +476,6 @@ def create_movie_submission():
                     seeking_description = body.get('seeking_description')) 
       
         movie_title = body.get('title')
-        
         db.session.add(movie)
         db.session.commit()
         selection = Movie.query.all()
@@ -506,38 +504,40 @@ def edit_movie(movie_id):
     try:
         form = MovieForm()
         movie_to_edit = Movie.query.get(movie_id)
-        
-        movie_data = {}
+       
+        if movie_to_edit is None:
+           abort(404)
+        else:
+            movie_data = {}
 
-        #load movie object
-        movie_data['id'] = movie_to_edit.id
-        movie_data['title'] = movie_to_edit.title
-        movie_data['release_date'] = movie_to_edit.release_date
-        movie_data['genre'] = movie_to_edit.genre
-        movie_data['website_link'] = movie_to_edit.website_link
-        movie_data['instagram_link'] = movie_to_edit.instagram_link
-        movie_data['image_link'] = movie_to_edit.image_link
-        movie_data['seeking_actors'] = movie_to_edit.seeking_actors
-        movie_data['seeking_description'] = movie_to_edit.seeking_description
+            #load movie object
+            movie_data['id'] = movie_to_edit.id
+            movie_data['title'] = movie_to_edit.title
+            movie_data['release_date'] = movie_to_edit.release_date
+            movie_data['genre'] = movie_to_edit.genre
+            movie_data['website_link'] = movie_to_edit.website_link
+            movie_data['instagram_link'] = movie_to_edit.instagram_link
+            movie_data['image_link'] = movie_to_edit.image_link
+            movie_data['seeking_actors'] = movie_to_edit.seeking_actors
+            movie_data['seeking_description'] = movie_to_edit.seeking_description
 
+            #load form object
+            form.title.data = movie_to_edit.title
+            form.release_date.data = movie_to_edit.release_date
+            form.genre.data = movie_to_edit.genre
+            form.website_link.data = movie_to_edit.website_link
+            form.image_link.data = movie_to_edit.image_link
+            form.instagram_link.data = movie_to_edit.instagram_link
+            form.seeking_actors.data = movie_to_edit.seeking_actors
+            form.seeking_description.data = movie_to_edit.seeking_description
 
-        #load form object
-        form.title.data = movie_to_edit.title
-        form.release_date.data = movie_to_edit.release_date
-        form.genre.data = movie_to_edit.genre
-        form.website_link.data = movie_to_edit.website_link
-        form.image_link.data = movie_to_edit.image_link
-        form.instagram_link.data = movie_to_edit.instagram_link
-        form.seeking_actors.data = movie_to_edit.seeking_actors
-        form.seeking_description.data = movie_to_edit.seeking_description
-
-        return jsonify(
-           {
-              "success": True,
-              "get_form": True,
-              "movie_id": movie_id
-           }
-        )
+            return jsonify(
+            {
+                "success": True,
+                "get_form": True,
+                "movie_id": movie_id
+            }
+            )
     
     except Exception as e:
        print(e)
@@ -550,23 +550,26 @@ def edit_movie_submission(movie_id):
     try:
         movie_to_edit = Movie.query.get(movie_id)
         body = request.get_json()
-      
-        movie_to_edit.title = body.get('title')
-        movie_to_edit.release_date = body.get('release_date')
-        movie_to_edit.genre = body.get('genre')
-        movie_to_edit.website_link = body.get('website_link')
-        movie_to_edit.image_link = body.get('image_link')
-        movie_to_edit.instagram_link = body.get('instagram_link')
-        movie_to_edit.seeking_actors = body.get('seeking_actors')
-        movie_to_edit.seeking_description = body.get('seeking_description')
 
-        db.session.commit()
+        if movie_to_edit is None:
+           abort(404)
+        else: 
+            movie_to_edit.title = body.get('title')
+            movie_to_edit.release_date = body.get('release_date')
+            movie_to_edit.genre = body.get('genre')
+            movie_to_edit.website_link = body.get('website_link')
+            movie_to_edit.image_link = body.get('image_link')
+            movie_to_edit.instagram_link = body.get('instagram_link')
+            movie_to_edit.seeking_actors = body.get('seeking_actors')
+            movie_to_edit.seeking_description = body.get('seeking_description')
 
-        return jsonify(
-            {
-                "success": True,
-                "movie_id": movie_id
-            })
+            db.session.commit()
+
+            return jsonify(
+                {
+                    "success": True,
+                    "movie_id": movie_id
+                })
 
     except Exception as e:
       print(e)
@@ -583,8 +586,8 @@ def delete_movie(movie_id):
 
     try:
         movie_to_delete = Movie.query.filter(Movie.id == movie_id).one_or_none()
+
         if movie_to_delete is None:
-            print('hakuna movie****')
             abort(422)
 
         else:
@@ -782,4 +785,4 @@ if __name__ == '__main__':
     #port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=5001)
 
-#return app
+

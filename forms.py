@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
+from wtforms import StringField, SelectField, SelectMultipleField, BooleanField, ValidationError
 import re
-from wtforms.validators import DataRequired, AnyOf, URL, Regexp
+from wtforms.validators import DataRequired, URL
 
 def validate_phone(form, phone):
     us_phone_num = '^([0-9]{3}[-][0-9]{3}[-][0-9]{4}$)'
@@ -186,7 +186,3 @@ class MovieForm(Form):
     seeking_description = StringField(
         'seeking_description'
     )
-
-
-
-

@@ -16,12 +16,7 @@ import os
 from auth.decorators import requires_auth, AuthError
 #----------------------------------------------------------------------------#
 # App Config.
-# TODO: Refactored to file models.py == DONE
-
-#----------------------------------------------------------------------------#
-# TODO: connect to a local postgresql database == DONE
-#----------------------------------------------------------------------------
-#----------------------------------------------------------------------------#
+# NOTE: Refactored to file models.py == DONE
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -41,27 +36,24 @@ app.jinja_env.filters['datetime'] = format_datetime
 # Controllers.
 #----------------------------------------------------------------------------#
 
+#  ----------------------------------------------------------------
+#  HOME or INDEX
+#  ----------------------------------------------------------------
+
 @app.route('/')
 def index():
   excited = os.environ['EXCITED']
   if excited == 'true':
     print("***EXCITED is true!!********")
-    print(os.environ['DATABASE_URL'])
   #token = get_token_auth_header()
   #session['user'] = token
   return render_template('pages/home.html')
 
-def add(number_one, number_two):
-  return number_one + number_two
-
-def divide(number_one, number_two):
-  if number_two == 0:
-    raise ValueError
-  return number_one / number_two
 
 #  ----------------------------------------------------------------
 #  ACTORS
 #  ----------------------------------------------------------------
+
 
 #  Show ALL ACTORS
 #  ----------------------------------------------------------------
@@ -69,13 +61,12 @@ def divide(number_one, number_two):
 @requires_auth('get:actors')
 def actors(payload):
   if 'get:actors' in payload['permissions']:
-    print('**** payload deeeets /actors *****')
+    print('**** payload /actors *****')
     print(payload['permissions'])
 
     try:
       actors_list = Actor.query.distinct('city')
       actors = []
-      selection = Actor.query.all()
 
       for one_actor in actors_list:
         actor_data = {}
@@ -88,14 +79,12 @@ def actors(payload):
         actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
         actors.append(actor_data)
 
-      print('**** all actors... *****')
-      print(actors)
-
       return render_template('pages/actors.html', actors=actors)
     
     except Exception as e:
       print(e)
       abort(404)
+
   else:
     abort(AuthError)
   
@@ -106,7 +95,7 @@ def actors(payload):
 @requires_auth('get:actors')
 def show_actor(payload, actor_id):
   if 'get:actors' in payload['permissions']:
-    print('****payload deeeets /actors/ID*****')
+    print('****payload /actors/ID*****')
     print(payload['permissions'])
 
     error = False
@@ -155,29 +144,28 @@ def show_actor(payload, actor_id):
           actor_selected_data['upcoming_showings_count'] += 1
           actor_selected_data['upcoming_showings'].append(this_showing)
 
+      return render_template('pages/show_actor.html', actor=actor_selected_data)
+
     except:
       error = True
       print(sys.exc_info())
+
     if error:
       error = False
       flash('This actor does NOT exist in our records.')
       return render_template('pages/home.html')
     
-    return render_template('pages/show_actor.html', actor=actor_selected_data)
-  
   else:
     abort(AuthError)
 
 
-
 #  Create ACTOR
 #  ----------------------------------------------------------------
-
 @app.route('/actors/create', methods=['GET'])
 @requires_auth('post:actors')
 def create_actor_form(payload):
   if 'post:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/create GET FORM *****')
+    print('**** payload /actors/create GET FORM *****')
     print(payload['permissions'])
     
     actor_form = ActorForm()
@@ -185,11 +173,12 @@ def create_actor_form(payload):
   else:
     abort(AuthError)
 
+
 @app.route('/actors/create', methods=['POST'])
 @requires_auth('post:actors')
 def create_actor_submission(payload):
   if 'post:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/create POST FORM*****')
+    print('**** payload /actors/create POST FORM *****')
     print(payload['permissions'])
 
     error = False
@@ -197,7 +186,6 @@ def create_actor_submission(payload):
 
     try:
       form = ActorForm(request.form)
-
       actor = Actor(name = form.name.data,
                     age = form.age.data,
                     gender = form.gender.data,
@@ -212,7 +200,6 @@ def create_actor_submission(payload):
       
       db.session.add(actor)
       db.session.commit()
-
       actor_name = form.name.data
 
     except:
@@ -238,88 +225,86 @@ def create_actor_submission(payload):
 
 #  Update ACTOR
 #  ----------------------------------------------------------------
-
 @app.route('/actors/<int:actor_id>/edit', methods=['GET'])
 @requires_auth('patch:actors')
 def edit_actor(payload, actor_id):
   if 'patch:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/edit GET FORM *****')
+    print('**** payload /actors/ID/edit GET FORM *****')
     print(payload['permissions'])
 
     form = ActorForm()
-    actor_data = {}
     actor_to_edit = Actor.query.get(actor_id)
 
-    #pass all the actor data
-    actor_data['id'] = actor_to_edit.id
-    actor_data['name'] = actor_to_edit.name
-    actor_data['age'] = actor_to_edit.age
-    actor_data['gender'] = actor_to_edit.gender
-    actor_data['genre'] = actor_to_edit.genre
-    actor_data['city'] = actor_to_edit.city
-    actor_data['state'] = actor_to_edit.state
-    actor_data['image_link'] = actor_to_edit.image_link
-    actor_data['website_link'] = actor_to_edit.website_link
-    actor_data['instagram_link'] = actor_to_edit.instagram_link
-    actor_data['seeking_casting'] = actor_to_edit.seeking_casting
-    actor_data['seeking_description'] = actor_to_edit.seeking_description
+    if actor_to_edit is None:
+      flash('An error occured. Actor not found in our records.')
+      abort(404)
+    else:
+      actor_data = {}
 
-    print('****CASTING SEEKING EDIT/GET******')
-    print(actor_to_edit.seeking_casting)
+      #pass all the actor data
+      actor_data['id'] = actor_to_edit.id
+      actor_data['name'] = actor_to_edit.name
+      actor_data['age'] = actor_to_edit.age
+      actor_data['gender'] = actor_to_edit.gender
+      actor_data['genre'] = actor_to_edit.genre
+      actor_data['city'] = actor_to_edit.city
+      actor_data['state'] = actor_to_edit.state
+      actor_data['image_link'] = actor_to_edit.image_link
+      actor_data['website_link'] = actor_to_edit.website_link
+      actor_data['instagram_link'] = actor_to_edit.instagram_link
+      actor_data['seeking_casting'] = actor_to_edit.seeking_casting
+      actor_data['seeking_description'] = actor_to_edit.seeking_description
 
-    #populate the form with existing actor data
-    form.name.data = actor_to_edit.name
-    form.age.data = actor_to_edit.age
-    form.gender.data = actor_to_edit.gender
-    form.genre.data = actor_to_edit.genre
-    form.city.data = actor_to_edit.city
-    form.state.data = actor_to_edit.state
-    form.image_link.data = actor_to_edit.image_link
-    form.instagram_link.data = actor_to_edit.instagram_link
-    form.website_link.data = actor_to_edit.website_link
-    form.seeking_casting.data = actor_to_edit.seeking_casting
-    form.seeking_description.data = actor_to_edit.seeking_description
+      #populate the form with existing actor data
+      form.name.data = actor_to_edit.name
+      form.age.data = actor_to_edit.age
+      form.gender.data = actor_to_edit.gender
+      form.genre.data = actor_to_edit.genre
+      form.city.data = actor_to_edit.city
+      form.state.data = actor_to_edit.state
+      form.image_link.data = actor_to_edit.image_link
+      form.instagram_link.data = actor_to_edit.instagram_link
+      form.website_link.data = actor_to_edit.website_link
+      form.seeking_casting.data = actor_to_edit.seeking_casting
+      form.seeking_description.data = actor_to_edit.seeking_description
 
-    print('****CASTING SEEKING EDIT/POST/form display******')
-    print(form.seeking_casting.data)
-
-    return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
+      return render_template('/forms/edit_actor.html', form = form, actor = actor_data)
   
   else:
     abort(AuthError)
-
 
 
 @app.route('/actors/<int:actor_id>/edit', methods=['POST'])
 @requires_auth('patch:actors')
 def edit_actor_submission(payload, actor_id):
   if 'patch:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/edit POST FORM *****')
+    print('**** payload /actors/ID/edit POST FORM *****')
     print(payload['permissions'])
 
     error = False
+    form = ActorForm(request.form)
+    actor_edit = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
     try:
-      #actor to edit
-      actor_edit = Actor.query.get(actor_id)
-      #form details
-      form = ActorForm(request.form)
+      if actor_edit is None:
+        flash('An error occured. Actor not found in our records.')
+        abort(404)
+      else:
+        actor_edit.name = form.name.data
+        actor_edit.age = form.age.data
+        actor_edit.gender = form.gender.data
+        actor_edit.genre = form.genre.data
+        actor_edit.city = form.city.data
+        actor_edit.state = form.state.data
+        actor_edit.instagram_link = form.instagram_link.data
+        actor_edit.website_link = form.website_link.data
+        actor_edit.image_link = form.image_link.data
+        actor_edit.seeking_casting = form.seeking_casting.data
+        actor_edit.seeking_description = form.seeking_description.data
 
-      actor_edit.name = form.name.data
-      actor_edit.age = form.age.data
-      actor_edit.gender = form.gender.data
-      actor_edit.genre = form.genre.data
-      actor_edit.city = form.city.data
-      actor_edit.state = form.state.data
-      actor_edit.instagram_link = form.instagram_link.data
-      actor_edit.website_link = form.website_link.data
-      actor_edit.image_link = form.image_link.data
-      actor_edit.seeking_casting = form.seeking_casting.data
-      actor_edit.seeking_description = form.seeking_description.data
+        db.session.commit()
+        flash('Edit was successful!')
 
-      print('****CASTING SEEKING EDIT/POST******')
-      print(form.seeking_casting.data)
-      db.session.commit()
     except:
       error = True
       db.session.rollback()
@@ -330,8 +315,6 @@ def edit_actor_submission(payload, actor_id):
       error = False
       flash('Edit was UNSUCCESSFUL! Please try again.')
       abort(404)
-    else:
-      flash('Edit was successful!')
 
     return redirect(url_for('show_actor', actor_id = actor_id))
   
@@ -345,25 +328,31 @@ def edit_actor_submission(payload, actor_id):
 @requires_auth('delete:actors')
 def delete_actor(payload, actor_id):
   if 'delete:actors' in payload['permissions']:
-    print('**** payload deeeets /actors/ID/delete *****')
+    print('**** payload /actors/ID/delete *****')
     print(payload['permissions'])
 
     error = False
+    actor_to_delete = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
     try:
-      Actor.query.filter_by(id = actor_id).delete()
-      db.session.commit()
+      if actor_to_delete is None:
+        flash('An error occured. Actor not found in our records.')
+        abort(404)
+      else:
+        Actor.query.filter_by(id = actor_id).delete()
+        db.session.commit()
+        flash('Actor successfully deleted!')
     except:
       error = True
       db.session.rollback()
+      print(sys.exc_info())
     finally:
       db.session.close()
-      flash('Actor successfully deleted!')
     if error:
       error = False
-      flash('An error occured. Venue not deleted.')
+      flash('An error occured. Actor not deleted.')
       abort(404)
-
+    
     return redirect(url_for('index'))
   
   else:
@@ -371,28 +360,24 @@ def delete_actor(payload, actor_id):
 
 
 
+
 #  ----------------------------------------------------------------
 #  MOVIES
 #  ----------------------------------------------------------------
 
+
 #  Show ALL MOVIES
 #  ----------------------------------------------------------------
-
 @app.route('/movies')
 @requires_auth('get:movies')
 def movies(payload):
   if 'get:movies' in payload['permissions']:
-    print('**** payload deeeets /movies *****')
+    print('**** payload /movies *****')
     print(payload['permissions'])
 
     try:
       all_movies = Movie.query.all()
       movie_data = []
-      selection = Movie.query.all()
-      status_metadata = {
-        "success": True,
-        "total_actors": len(selection)
-      }
 
       for movie in all_movies:
         movie_formatted = {}
@@ -400,10 +385,6 @@ def movies(payload):
         movie_formatted['title'] = movie.title
         movie_data.append(movie_formatted)
 
-      movie_data.append(status_metadata)
-
-      print('**** all movies... *****')
-      print(movie_data)
       return render_template('pages/movies.html', movies = movie_data)
     
     except Exception as e:
@@ -413,14 +394,14 @@ def movies(payload):
   else:
     abort(AuthError)
 
+
 #  Show ONE MOVIE
 #  ----------------------------------------------------------------
-
 @app.route('/movies/<int:movie_id>')
 @requires_auth('get:movies')
 def show_movie(payload, movie_id):
   if 'get:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID *****')
+    print('**** payload /movies/ID *****')
     print(payload['permissions'])
 
     error = False
@@ -478,7 +459,6 @@ def show_movie(payload, movie_id):
     abort(AuthError)
 
 
-
 #  Create MOVIE
 #  ----------------------------------------------------------------
 
@@ -487,7 +467,7 @@ def show_movie(payload, movie_id):
 @requires_auth('post:movies')
 def create_movie_form(payload):
   if 'post:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/create GET FORM *****')
+    print('**** payload /movies/create GET FORM *****')
     print(payload['permissions'])
 
     form = MovieForm()
@@ -502,7 +482,7 @@ def create_movie_form(payload):
 @requires_auth('post:movies')
 def create_movie_submission(payload):
   if 'post:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/create POST FORM *****')
+    print('**** payload /movies/create POST FORM *****')
     print(payload['permissions'])
 
     error = False
@@ -548,71 +528,72 @@ def create_movie_submission(payload):
 @requires_auth('patch:movies')
 def edit_movie(payload, movie_id):
   if 'patch:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/edit FORM GET *****')
+    print('**** payload /movies/ID/edit FORM GET *****')
     print(payload['permissions'])
 
     form = MovieForm()
     movie_to_edit = Movie.query.get(movie_id)
-    print('*******MOVIE TO EDIT *******')
-    
-    movie_data = {}
 
-    #load movie object
-    movie_data['id'] = movie_to_edit.id
-    movie_data['title'] = movie_to_edit.title
-    movie_data['release_date'] = movie_to_edit.release_date
-    movie_data['genre'] = movie_to_edit.genre
-    movie_data['website_link'] = movie_to_edit.website_link
-    movie_data['instagram_link'] = movie_to_edit.instagram_link
-    movie_data['image_link'] = movie_to_edit.image_link
-    movie_data['seeking_actors'] = movie_to_edit.seeking_actors
-    movie_data['seeking_description'] = movie_to_edit.seeking_description
+    if movie_to_edit is None:
+      flash('An error occured. Movie not found in our records.')
+      abort(404)
+    else:
+      movie_data = {}
 
+      #load movie object
+      movie_data['id'] = movie_to_edit.id
+      movie_data['title'] = movie_to_edit.title
+      movie_data['release_date'] = movie_to_edit.release_date
+      movie_data['genre'] = movie_to_edit.genre
+      movie_data['website_link'] = movie_to_edit.website_link
+      movie_data['instagram_link'] = movie_to_edit.instagram_link
+      movie_data['image_link'] = movie_to_edit.image_link
+      movie_data['seeking_actors'] = movie_to_edit.seeking_actors
+      movie_data['seeking_description'] = movie_to_edit.seeking_description
 
-    #load form object
-    form.title.data = movie_to_edit.title
-    form.release_date.data = movie_to_edit.release_date
-    form.genre.data = movie_to_edit.genre
-    form.website_link.data = movie_to_edit.website_link
-    form.image_link.data = movie_to_edit.image_link
-    form.instagram_link.data = movie_to_edit.instagram_link
-    form.seeking_actors.data = movie_to_edit.seeking_actors
-    form.seeking_description.data = movie_to_edit.seeking_description
+      #load form object
+      form.title.data = movie_to_edit.title
+      form.release_date.data = movie_to_edit.release_date
+      form.genre.data = movie_to_edit.genre
+      form.website_link.data = movie_to_edit.website_link
+      form.image_link.data = movie_to_edit.image_link
+      form.instagram_link.data = movie_to_edit.instagram_link
+      form.seeking_actors.data = movie_to_edit.seeking_actors
+      form.seeking_description.data = movie_to_edit.seeking_description
 
-    print('*******RELEASE DATE*******')
-    print(type(form.release_date.data))
-  
-
-    return render_template('forms/edit_movie.html', form=form, movie=movie_data)
+      return render_template('forms/edit_movie.html', form=form, movie=movie_data)
   
   else:
     abort(AuthError)
-
 
 
 @app.route('/movies/<int:movie_id>/edit', methods=['POST'])
 @requires_auth('patch:movies')
 def edit_movie_submission(payload, movie_id):
   if 'patch:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/edit FORM POST *****')
+    print('**** payload /movies/ID/edit FORM POST *****')
     print(payload['permissions'])
 
     error = False
     form = MovieForm(request.form)
+    movie_to_edit = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
     try:
-      movie_to_edit = Movie.query.get(movie_id)
+      if movie_to_edit is None:
+        flash('An error occured. Movie not found in our records.')
+        abort(404)
+      else:
+        movie_to_edit.title = form.title.data
+        movie_to_edit.release_date = form.release_date.data
+        movie_to_edit.genre = form.genre.data
+        movie_to_edit.website_link = form.website_link.data
+        movie_to_edit.image_link = form.image_link.data
+        movie_to_edit.instagram_link = form.instagram_link.data
+        movie_to_edit.seeking_actors = form.seeking_actors.data
+        movie_to_edit.seeking_description = form.seeking_description.data
 
-      movie_to_edit.title = form.title.data
-      movie_to_edit.release_date = form.release_date.data
-      movie_to_edit.genre = form.genre.data
-      movie_to_edit.website_link = form.website_link.data
-      movie_to_edit.image_link = form.image_link.data
-      movie_to_edit.instagram_link = form.instagram_link.data
-      movie_to_edit.seeking_actors = form.seeking_actors.data
-      movie_to_edit.seeking_description = form.seeking_description.data
-
-      db.session.commit()
+        db.session.commit()
+        flash('Edit was successfull!')
 
     except:
       error = True
@@ -624,8 +605,6 @@ def edit_movie_submission(payload, movie_id):
       error = False
       flash('an error occured, edit unsuccessful.')
       abort(500)
-    else:
-      flash('edit was successfull!')
 
     return redirect(url_for('show_movie', movie_id = movie_id))
   
@@ -641,26 +620,36 @@ def edit_movie_submission(payload, movie_id):
 @requires_auth('delete:movies')
 def delete_movie(payload, movie_id):
   if 'delete:movies' in payload['permissions']:
-    print('**** payload deeeets /movies/ID/delete *****')
+    print('**** payload /movies/ID/delete *****')
     print(payload['permissions'])
 
     error = False
+    
+
     try:
-      Movie.query.filter_by(id = movie_id).delete()
-      db.session.commit()
+      movie_to_delete = Movie.query.filter(Movie.id == movie_id).one_or_none()
+
+      if movie_to_delete is None:
+        flash('An error occured. Movie not found in our records.')
+        abort(404)
+      else:
+        Movie.query.filter_by(id = movie_id).delete()
+        db.session.commit()
+        flash('Movie successfully deleted.')
+
     except:
       error = True
       db.session.rollback()
       print(sys.exc_info())
+
     finally:
       db.session.close()
+
     if error:
       error = False
-      flash('An error occured. Deletion not successful.')
+      flash('An error occured. Actor not deleted.')
       abort(404)
-    else:
-      flash('Movie successfully deleted.')
-
+    
     return render_template('pages/home.html')
   
   else:
@@ -678,7 +667,7 @@ def delete_movie(payload, movie_id):
 @requires_auth('post:showings')
 def create_showing_form(payload):
   if 'post:showings' in payload['permissions']:
-    print('**** payload deeeets /showings/create GET FORM *****')
+    print('**** payload /showings/create GET FORM *****')
     print(payload['permissions'])
     form = ShowingForm()
 
@@ -692,7 +681,7 @@ def create_showing_form(payload):
 @requires_auth('post:showings')
 def create_showing_submission(payload):
   if 'post:showings' in payload['permissions']:
-    print('**** payload deeeets /showings/create POST FORM *****')
+    print('**** payload /showings/create POST FORM *****')
     print(payload['permissions'])
 
     error = False
@@ -706,6 +695,7 @@ def create_showing_submission(payload):
       
       db.session.add(showing_created)
       db.session.commit()
+      flash('Showing successfully added!')
 
     except:
       error = True
@@ -714,7 +704,7 @@ def create_showing_submission(payload):
 
     finally:
       db.session.close()
-      flash('Showing successfully added!')
+      
 
     if error:
       error = False
@@ -762,20 +752,21 @@ def showings(payload):
 
 
 
-
+# -------------------------------------------------------------------
+# ERROR HANDLERS
+# -------------------------------------------------------------------
 
 
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('errors/404.html'), 404
 
+
 @app.errorhandler(500)
 def server_error(error):
     return render_template('errors/500.html'), 500
 
-# -------------------------------------------------------------------
-# implement error handler for AuthError
-# -------------------------------------------------------------------
+
 @app.errorhandler(AuthError)
 def auth_error(error):
     print('***** AUTH ERROR ******')
@@ -790,20 +781,7 @@ def auth_error(error):
 
     return render_template('errors/autherror.html', error_details = error_details)
 
-""" 
-@app.errorhandler(AuthError)
-def auth_error(error):
-  print('***** AUTH ERROR ******')
-  print(error)
 
-  return jsonify(
-    {
-      "success": False,
-      "error": error.status_code,
-      "message": error.error.get('description')
-    }
-  ), error.status_code
-"""
 
 if not app.debug:
     file_handler = FileHandler('error.log')
@@ -828,4 +806,4 @@ if __name__ == '__main__':
     #port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=5001)
 
-#return app
+
