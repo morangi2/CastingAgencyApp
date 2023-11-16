@@ -1,9 +1,7 @@
 #----------------------------------------------------------------------------#
 # Imports
 #----------------------------------------------------------------------------#
-import os
-from flask import Blueprint, Flask
-from flask_cors import CORS
+from flask import Flask
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,6 +13,7 @@ app.config.from_object('config') #in models.py = OK
 db = SQLAlchemy(app) #in models.py = OK
 migrate = Migrate(app, db) #in manage.py + manager == OK
 
+""" 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
@@ -26,6 +25,7 @@ def after_request(response):
         "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"
     )
     return response
+"""
 
 app.register_blueprint(auth_bp, url_prefix='/')
 

@@ -341,7 +341,7 @@ def edit_actor_submission(payload, actor_id):
 
 #  Delete ACTOR
 #  ----------------------------------------------------------------
-@app.route('/actors/<int:actor_id>/delete', methods=['DELETE'])
+@app.route('/actors/<int:actor_id>/delete', methods=['GET'])
 @requires_auth('delete:actors')
 def delete_actor(payload, actor_id):
   if 'delete:actors' in payload['permissions']:
@@ -637,7 +637,7 @@ def edit_movie_submission(payload, movie_id):
 #  Delete MOVIE
 #  ----------------------------------------------------------------
 
-@app.route('/movies/<int:movie_id>/delete', methods = ['DELETE'])
+@app.route('/movies/<int:movie_id>/delete', methods = ['GET'])
 @requires_auth('delete:movies')
 def delete_movie(payload, movie_id):
   if 'delete:movies' in payload['permissions']:

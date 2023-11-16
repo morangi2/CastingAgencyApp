@@ -317,10 +317,9 @@ def edit_actor_submission(actor_id):
     )
   
 
-
 #  Delete ACTOR
 #  ----------------------------------------------------------------
-@app.route('/actors/<int:actor_id>/delete', methods=['DELETE'])
+@app.route('/actors/<int:actor_id>/delete', methods=['GET'])
 def delete_actor(actor_id):
 
     try:
@@ -579,7 +578,7 @@ def edit_movie_submission(movie_id):
 #  Delete MOVIE
 #  ----------------------------------------------------------------
 
-@app.route('/movies/<int:movie_id>/delete', methods = ['DELETE'])
+@app.route('/movies/<int:movie_id>/delete', methods = ['GET'])
 def delete_movie(movie_id):
 
     try:
