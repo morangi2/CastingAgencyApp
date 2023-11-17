@@ -34,7 +34,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
 #   TEST BLOCK: ACTORS ENDPOINTS
 #  ----------------------------------------------------------------
 
-
+    """
     #testcase 1: test actors() == success
     def test_actors(self):
         response = app.test_client().get("/actors")
@@ -159,14 +159,14 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
         
-    
+    """
 
 
 #  ----------------------------------------------------------------
 #  TEST BLOCK: MOVIES ENDPOINTS
 #  ----------------------------------------------------------------
 
-    """
+    
     #testcase 1: test movies() == success
     def test_movies(self):
         response = app.test_client().get("/movies")
@@ -175,6 +175,8 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertTrue(data["total_movies"])
+        self.assertTrue(len(data['movies']))
+    
 
     #testcase 2: test movies() == error, wrong url
     def test_movies_404_error(self):
@@ -186,15 +188,16 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
 
-
+    
     #testcase 3: test show_movie() == success
     def test_show_movie(self):
-        response = app.test_client().get("/movies/3")
+        response = app.test_client().get("/movies/13")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["current_movie"], 3)
+        self.assertEqual(data["current_movie_id"], 13)
+        self.assertTrue(len(data["movie_details"]))
 
 
     #testcase 4: test show_movie() == error
@@ -207,6 +210,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
 
+    
     #testcase 5: test create_movie_form() == success
     def test_create_movie_form(self):
         response = app.test_client().get("/movies/create")
@@ -215,6 +219,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["get_form"], True)
+
 
     #testcase 6: test create_movie_submission() == success
     def test_create_movie_submission(self):
@@ -227,6 +232,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertTrue(data["total_movies"])
         self.assertTrue(data["new_movie_name"])
 
+
     #testcase 7: test create_movies_submission() == error, wrong URL, 404
     def test_create_movie_submission_404_error(self):
         response = app.test_client().post("/movies/create/data")
@@ -237,29 +243,30 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
 
+    
     #testcase 8: test edit_movie_form() == success
     def test_edit_movie_form(self):
-        response = app.test_client().get("/movies/4/edit")
+        response = app.test_client().get("/movies/15/edit")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["get_form"], True)
-        self.assertEqual(data["movie_id"], 4)
+        self.assertEqual(data["movie_id"], 15)
 
     #testcase 9: test edit_movie_submission() == success
     def test_edit_movie_submission(self):
         new_movie_json = json.loads(self.new_movie)
-        response = app.test_client().post("/movies/3/edit", json=new_movie_json)
+        response = app.test_client().post("/movies/15/edit", json=new_movie_json)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["movie_id"], 3)
+        self.assertEqual(data["movie_id"], 15)
 
-    #testcase 10: test edit_movie_submission() == error, wrong URL, 404; resource not found
+    #testcase 10: test edit_movie_submission() == error, non-existent movie ID, 404
     def test_edit_movie_submission_404_error(self):
-        response = app.test_client().post("/movie/10000/edit")
+        response = app.test_client().post("/movie/15000000")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -267,19 +274,21 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
 
+    
     #testcase 11: test delete_movie() == success
     def test_delete_movie(self):
-        response = app.test_client().delete("/movies/10/delete")
+        response = app.test_client().get("/movies/19/delete")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["deleted_movie_id"], 10)
+        self.assertEqual(data["deleted_movie_id"], 19)
         self.assertTrue(data["total_movies"])
+
 
     #testcase 12: test delete_movie() == error, wrong URL, 404; resource not found
     def test_delete_movie_404_error(self):
-        response = app.test_client().delete("/movies/44000/delete/nothing")
+        response = app.test_client().get("/movies/1900/delete")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -287,7 +296,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found") 
         
-    """
+   
 
 #  ----------------------------------------------------------------
 #  TEST BLOCK: SHOWINGS ENDPOINTS

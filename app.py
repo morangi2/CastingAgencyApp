@@ -410,40 +410,46 @@ def show_movie(payload, movie_id):
     try:
       movie_selected = Movie.query.get(movie_id)
       showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
-      movie_selected_data = {}
+      
+      if movie_selected is None:
+        flash('This Movie does NOT exist in our records.')
+        error = True
+        #confirm this on the browser
+      else: 
+        movie_selected_data = {}
 
-      movie_selected_data['id'] = movie_selected.id
-      movie_selected_data['title'] = movie_selected.title
-      movie_selected_data['release_date'] = movie_selected.release_date
-      movie_selected_data['genre'] = movie_selected.genre
-      movie_selected_data['website_link'] = movie_selected.website_link
-      movie_selected_data['instagram_link'] = movie_selected.instagram_link
-      movie_selected_data['image_link'] = movie_selected.image_link
-      movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
-      movie_selected_data['seeking_description'] = movie_selected.seeking_description
-      movie_selected_data['past_showings'] = []
-      movie_selected_data['upcoming_showings'] = []
-      movie_selected_data['past_showings_count'] = 0
-      movie_selected_data['upcoming_showings_count'] = 0
+        movie_selected_data['id'] = movie_selected.id
+        movie_selected_data['title'] = movie_selected.title
+        movie_selected_data['release_date'] = movie_selected.release_date
+        movie_selected_data['genre'] = movie_selected.genre
+        movie_selected_data['website_link'] = movie_selected.website_link
+        movie_selected_data['instagram_link'] = movie_selected.instagram_link
+        movie_selected_data['image_link'] = movie_selected.image_link
+        movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
+        movie_selected_data['seeking_description'] = movie_selected.seeking_description
+        movie_selected_data['past_showings'] = []
+        movie_selected_data['upcoming_showings'] = []
+        movie_selected_data['past_showings_count'] = 0
+        movie_selected_data['upcoming_showings_count'] = 0
 
-      for showing in showings_joinedwith_actors:
-        this_showing = {}
-        this_showing['actor_id'] = showing.actor_id
-        this_showing['actor_name'] = showing.actor.name
-        this_showing['actor_image_link'] = showing.actor.image_link
-        this_showing['start_time'] = showing.start_time
+        for showing in showings_joinedwith_actors:
+          this_showing = {}
+          this_showing['actor_id'] = showing.actor_id
+          this_showing['actor_name'] = showing.actor.name
+          this_showing['actor_image_link'] = showing.actor.image_link
+          this_showing['start_time'] = showing.start_time
 
-        showing_start_time = showing.start_time
-        showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
-        timestamp_db = datetime.timestamp(showing_start_time_formatted)
-        timestamp_current = time.time()
+          showing_start_time = showing.start_time
+          showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+          timestamp_db = datetime.timestamp(showing_start_time_formatted)
+          timestamp_current = time.time()
 
-        if timestamp_current > timestamp_db:
-          movie_selected_data['past_showings'].append(this_showing)
-          movie_selected_data['past_showings_count'] += 1
-        else:
-          movie_selected_data['upcoming_showings'].append(this_showing)
-          movie_selected_data['upcoming_showings_count'] += 1
+          if timestamp_current > timestamp_db:
+            movie_selected_data['past_showings'].append(this_showing)
+            movie_selected_data['past_showings_count'] += 1
+          else:
+            movie_selected_data['upcoming_showings'].append(this_showing)
+            movie_selected_data['upcoming_showings_count'] += 1
 
     except:
       error = True
@@ -625,13 +631,13 @@ def delete_movie(payload, movie_id):
 
     error = False
     
-
     try:
       movie_to_delete = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
       if movie_to_delete is None:
         flash('An error occured. Movie not found in our records.')
         abort(404)
+        #check error 415 if URL is http://127.0.0.1:5001/movies/44000/delete
       else:
         Movie.query.filter_by(id = movie_id).delete()
         db.session.commit()

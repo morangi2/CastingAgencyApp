@@ -291,7 +291,7 @@ Curl Example:
 
 ### POST /actors/create
 
-- Loads the form to create a new actor.
+- Posts the details of the new actor.
 - Request Arguments: None
 - Curl example: `curl http://127.0.0.1:5001/actors/create -X POST -H "Content-Type: application/json" -d '{"name":"Mercy Test", "age":22, "gender":"female" ,"city":"Toronnno", "state":"WA", "genre":"Action", "instagram_link":"http://instagram.com/test", "website_link":"http://google.com/test", "image_link":"http://image.com/test", "seeking_casting":"true", "seeking_description":"desc test"}'`
 - Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
@@ -322,7 +322,7 @@ Curl Example:
 ```
 
 ### POST /actors/<int:actor_id>/edit
-- Loads a pre-filled form to edit the details selected actor.
+- Updates the details of the actor selected in the database.
 - Request Arguments: `actor_id`
 - Curl example: `curl http://127.0.0.1:5001/actors/77/edit -X POST -H "Content-Type: application/json" -d '{"name":"Mercy Test", "age":22, "gender":"female" ,"city":"Toronnno", "state":"WA", "genre":"Action", "instagram_link":"http://instagram.com/test", "website_link":"http://google.com/test", "image_link":"http://image.com/test", "seeking_casting":"true", "seeking_description":"desc test"}'`
 - Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
@@ -339,7 +339,7 @@ Curl Example:
 - Deletes the specified actor from the database.
 - Request Arguments: `actor_id`
 - Curl example: `curl http://127.0.0.1:5001/actors/30/edit -X GET -H "Content-Type: application/json"`
-- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
 - **NOTE:** GET is used here because DELETE method cannot be accessed via the browser
 - Returns: An object with the keys: `deleted_actor_id`, `total_actors`, and `success` in the format below: 
 
@@ -350,3 +350,152 @@ Curl Example:
   "total_actors": 34
 }
 ```
+
+
+## MOVIES Endpoints
+
+### GET /movies
+
+- Fetches a dictionary of all the movies.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/movies -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys, `movies`, `success`, and `total_movies` in the format below.
+
+```json
+{
+  "movies": [
+    {
+      "genre": "{Action}",
+      "id": 3,
+      "image_link": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2x1YiUyMHBhcnR5fGVufDB8fDB8fHwy",
+      "instagram_link": "http://instagram.com/blackpanther",
+      "release_date": "2024-11-10 13:45:38",
+      "seeking_actors": "false",
+      "seeking_description": "",
+      "title": "Black Panther",
+      "website_link": "http://google.com/balckpanther"
+    },
+    {
+      "genre": "{Drama,Other}",
+      "id": 13,
+      "image_link": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2x1YiUyMHBhcnR5fGVufDB8fDB8fHwy",
+      "instagram_link": "http://instagram.com/tester",
+      "release_date": "2022-11-16 13:14:11",
+      "seeking_actors": "true",
+      "seeking_description": "Seeking for Vanderpump Rules actors.",
+      "title": "Vanderpump Rules",
+      "website_link": "https://www.google2.com/test3"
+    }
+  ],
+  "success": true,
+  "total_movies": 4
+}
+```
+
+### GET /movies/<int:movie_id>
+
+- Fetches a movie based on the ID provided.
+- Request Arguments: `movie_id`
+- Curl example: `curl http://127.0.0.1:5001/movies/13 -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys, `movie_details`, `current_movie_id`, and `success` in the format below.
+```json
+{
+  "current_movie_id": 13,
+  "movie_details": {
+    "genre": "{Drama,Other}",
+    "id": 13,
+    "image_link": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2x1YiUyMHBhcnR5fGVufDB8fDB8fHwy",
+    "instagram_link": "http://instagram.com/tester",
+    "past_showings": [],
+    "past_showings_count": 0,
+    "release_date": "2022-11-16 13:14:11",
+    "seeking_actors": "true",
+    "seeking_description": "Seeking for Vanderpump Rules actors.",
+    "title": "Vanderpump Rules",
+    "upcoming_showings": [],
+    "upcoming_showings_count": 0,
+    "website_link": "https://www.google2.com/test3"
+  },
+  "success": true
+}
+```
+
+### GET /movies/create
+- Loads the form to create a new movie.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/movies/create -X GET -H "Content-Type: application/json"`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `get_form`, and `success` in the format below: 
+
+```json
+{
+  "get_form": true,
+  "success": true
+}
+```
+
+### POST /movies/create
+
+- Posts the details of the new movie.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/movies/create -X POST -H "Content-Type: application/json" -d '{"title":"test SLY", "release_date":"2024-11-10 13:45:38", "genre":"Action", "instagram_link":"http://instagram.com/testtest", "website_link":"http://google.com/testtest", "image_link":"http://image.com/testtest", "seeking_actors":"true", "seeking_description":"seeking movies via unittest"}'`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `new_movie_name`, `success`, and `total_movies` in the format below: 
+
+```json
+{
+  "new_movie_name": "test SLY",
+  "success": true,
+  "total_movies": 5
+}
+```
+
+### GET /movies/<int:movie_id>/edit
+
+- Loads a pre-filled form to edit the details selected movie.
+- Request Arguments: `movie_id`
+- Curl example: `curl http://127.0.0.1:5001/movies/16/edit -X GET -H "Content-Type: application/json"`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `created_actor_name`, `success`, and `total_actors` in the format below: 
+
+```json
+{
+  "get_form": true,
+  "movie_id": 16,
+  "success": true
+}
+```
+
+### POST /movies/<int:movie_id>/edit
+- Updates the details of the movie selected in the database.
+- Request Arguments: `movie_id`
+- Curl example: `curl http://127.0.0.1:5001/movies/16/edit -X POST -H "Content-Type: application/json" -d '{"title":"SLY docuseries", "release_date":"2024-12-10 13:45:38", "genre":"Action", "instagram_link":"http://instagram.com/sly", "website_link":"http://google.com/sly", "image_link":"http://image.com/testtest", "seeking_actors":"true", "seeking_description":"seeking actors for the 2nd season"}'`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `movie_id`, and `success` in the format below: 
+
+```json
+{
+  "movie_id": 16,
+  "success": true
+}
+```
+
+### GET /movies/<int:movie_id>/delete
+- Deletes the specified movie from the database.
+- Request Arguments: `movie_id`
+- Curl example: `curl http://127.0.0.1:5001/movies/15/delete -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- **NOTE:** GET is used here because DELETE method cannot be accessed via the browser
+- Returns: An object with the keys: `deleted_movie_id`, `total_movies`, and `success` in the format below: 
+
+```json
+{
+  "deleted_movie_id": 15,
+  "success": true,
+  "total_movies": 6
+}
+```
+
+
