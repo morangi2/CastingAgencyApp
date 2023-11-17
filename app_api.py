@@ -3,6 +3,7 @@
 #----------------------------------------------------------------------------#
 
 import datetime
+import json
 import dateutil.parser
 import babel
 from flask import abort, jsonify, render_template, request, flash
@@ -84,25 +85,30 @@ def index():
 def actors():
 
     try:
-      actors_list = Actor.query.distinct('city')
+      actors_list = Actor.query.order_by(Actor.id).all()
       actors = []
-      selection = Actor.query.all()
 
       for one_actor in actors_list:
         actor_data = {}
-        """ actor_data['name'] = one_actor.name
+        actor_data['id'] = one_actor.id
+        actor_data['name'] = one_actor.name
         actor_data['age'] = one_actor.age
-        actor_data['gender'] = one_actor.gender """
+        actor_data['gender'] = one_actor.gender
         actor_data['city'] = one_actor.city
         actor_data['state'] = one_actor.state
-        actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
-        actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
+        actor_data['genre'] = one_actor.genre
+        actor_data['instagram_link'] = one_actor.instagram_link
+        actor_data['website_link'] = one_actor.website_link
+        actor_data['image_link'] = one_actor.image_link
+        actor_data['seeking_casting'] = one_actor.seeking_casting
+        actor_data['seeking_description'] = one_actor.seeking_description
         actors.append(actor_data)
 
       return jsonify(
             {
                 "success": True,
-                "total_actors": len(selection)
+                "total_actors": len(actors_list),
+                "actors": actors
             }
         )
    
@@ -121,44 +127,47 @@ def show_actor(actor_id):
       actor_selected = Actor.query.get(actor_id)
       showings_joinedwith_movies = Showing.query.filter_by(actor_id=actor_id).join(Movie).all()
 
-      actor_selected_data['id'] = actor_selected.id
-      actor_selected_data['name'] = actor_selected.name
-      actor_selected_data['age'] = actor_selected.age
-      actor_selected_data['gender'] = actor_selected.gender
-      actor_selected_data['city'] = actor_selected.city
-      actor_selected_data['state'] = actor_selected.state
-      actor_selected_data['genre'] = actor_selected.genre
-      actor_selected_data['instagram_link'] = actor_selected.instagram_link
-      actor_selected_data['website_link'] = actor_selected.website_link
-      actor_selected_data['image_link'] = actor_selected.image_link
-      actor_selected_data['seeking_casting'] = actor_selected.seeking_casting
-      actor_selected_data['seeking_description'] = actor_selected.seeking_description
-      actor_selected_data['upcoming_showings_count'] = 0
-      actor_selected_data['upcoming_showings'] = []
-      actor_selected_data['past_showings_count'] = 0
-      actor_selected_data['past_showings'] = []
+      if actor_selected is None:
+          abort(404)
+      else:
+        actor_selected_data['id'] = actor_selected.id
+        actor_selected_data['name'] = actor_selected.name
+        actor_selected_data['age'] = actor_selected.age
+        actor_selected_data['gender'] = actor_selected.gender
+        actor_selected_data['city'] = actor_selected.city
+        actor_selected_data['state'] = actor_selected.state
+        actor_selected_data['genre'] = actor_selected.genre
+        actor_selected_data['instagram_link'] = actor_selected.instagram_link
+        actor_selected_data['website_link'] = actor_selected.website_link
+        actor_selected_data['image_link'] = actor_selected.image_link
+        actor_selected_data['seeking_casting'] = actor_selected.seeking_casting
+        actor_selected_data['seeking_description'] = actor_selected.seeking_description
+        actor_selected_data['upcoming_showings_count'] = 0
+        actor_selected_data['upcoming_showings'] = []
+        actor_selected_data['past_showings_count'] = 0
+        actor_selected_data['past_showings'] = []
 
-      for showing in showings_joinedwith_movies:
-        this_showing = {}
-        this_showing['actor_id'] = showing.actor_id
-        this_showing['actor_image_link'] = showing.actor.image_link
-        this_showing['actor_name'] = showing.actor.name
-        this_showing['start_time'] = showing.start_time
-        this_showing['movie_id'] = showing.movie.id
-        this_showing['movie_title'] = showing.movie.title
-        this_showing['movie_image_link'] = showing.movie.image_link
+        for showing in showings_joinedwith_movies:
+            this_showing = {}
+            this_showing['actor_id'] = showing.actor_id
+            this_showing['actor_image_link'] = showing.actor.image_link
+            this_showing['actor_name'] = showing.actor.name
+            this_showing['start_time'] = showing.start_time
+            this_showing['movie_id'] = showing.movie.id
+            this_showing['movie_title'] = showing.movie.title
+            this_showing['movie_image_link'] = showing.movie.image_link
 
-        showing_start_time = showing.start_time
-        showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
-        timestamp_db = datetime.timestamp(showing_start_time_formatted)
-        timestamp_current = time.time()
+            showing_start_time = showing.start_time
+            showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+            timestamp_db = datetime.timestamp(showing_start_time_formatted)
+            timestamp_current = time.time()
 
-        if timestamp_current > timestamp_db:
-          actor_selected_data['past_showings_count'] += 1
-          actor_selected_data['past_showings'].append(this_showing)
-        else:
-          actor_selected_data['upcoming_showings_count'] += 1
-          actor_selected_data['upcoming_showings'].append(this_showing)
+            if timestamp_current > timestamp_db:
+                actor_selected_data['past_showings_count'] += 1
+                actor_selected_data['past_showings'].append(this_showing)
+            else:
+                actor_selected_data['upcoming_showings_count'] += 1
+                actor_selected_data['upcoming_showings'].append(this_showing)
 
     except Exception as e:
       print(e)
@@ -167,7 +176,8 @@ def show_actor(actor_id):
     return jsonify(
             {
                 "success": True,
-                "current_actor": actor_id
+                "current_actor_id": actor_id,
+                "actor_details": actor_selected_data
             }
         )
 
@@ -217,7 +227,7 @@ def create_actor_submission():
             {
                 "success": True,
                 "total_actors": len(selection),
-                "actor_name": actor_name
+                "created_actor_name": actor_name
             }
         )
     
@@ -330,7 +340,7 @@ def delete_actor(actor_id):
         actor_to_delete = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
         if actor_to_delete is None:
-            abort(422)
+            abort(415)
         else:  
             Actor.query.filter_by(id = actor_id).delete()
             db.session.commit()
@@ -345,7 +355,7 @@ def delete_actor(actor_id):
     
     except Exception as e:
         print(e)
-        abort(405)
+        abort(404)
 
     finally:
        db.session.close()
@@ -730,6 +740,17 @@ def bad_request(error):
         {
             "error": 404,
             "message": "Resource Not Found",
+            "success": False
+        }
+    )
+
+
+@app.errorhandler(415)
+def bad_request(error):
+    return jsonify(
+        {
+            "error": 415,
+            "message": "nsupported Media Type",
             "success": False
         }
     )

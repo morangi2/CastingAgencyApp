@@ -171,3 +171,182 @@ Overall, this project is designed using the MVC Framework.
       ├── layouts
       └── pages
   ```
+
+## Endpoints Documentation
+
+Below is a detailed documentation of the API endpoints including the URL, request parameters, and the response body. Use the examples below as a reference.
+
+### Setup To test the API in your Local Environment
+1. **Run the API server:**
+```
+export FLASK_APP=myapp
+export FLASK_DEBUG=true
+export FLASK_ENV=development # enables debug mode
+python3 app_api.py
+```
+2. **Load any of the endpoint URLs:**
+
+Browser Example: 
+```
+http://127.0.0.1:5001/actors
+```
+Curl Example:
+```
+`curl http://127.0.0.1:5001/actors -X GET -H "Content-Type: application/json"`
+```
+
+## ACTORS Endpoints
+
+### GET /actors
+
+- Fetches a dictionary of all the actors.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/actors -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys, `actors`, `success`, and `total_actors` in the format below.
+
+```json
+{
+  "actors": [
+    {
+      "age": 55,
+      "city": "Seattle",
+      "gender": "male",
+      "genre": "{Adventure}",
+      "id": 1,
+      "image_link": "https://images.unsplash.com/photo-1676490605000-a42a43a7ccbc?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "instagram_link": "http://instagram.com/jamiefoxx",
+      "name": "Jamie Foxx",
+      "seeking_casting": "false",
+      "seeking_description": "",
+      "state": "NY",
+      "website_link": "https://www.google.com/jamiefoxx"
+    },
+    {
+      "age": 40,
+      "city": "Nairobi",
+      "gender": "female",
+      "genre": "{Action,Thriller}",
+      "id": 2,
+      "image_link": "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&q=60&w=800&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y2x1YiUyMHBhcnR5fGVufDB8fDB8fHwy",
+      "instagram_link": "http://instagram.com/lupita",
+      "name": "Lupita Nyongo",
+      "seeking_casting": "true",
+      "seeking_description": "Seeking casting for the next epic Black Panther!",
+      "state": "WA",
+      "website_link": "http://google.com/lupita"
+    }
+  ],
+  "success": true,
+  "total_actors": 2
+}
+```
+
+### GET /actors/<int:actor_id>
+
+- Fetches an actor based on the ID provided.
+- Request Arguments: `actor_id`
+- Curl example: `curl http://127.0.0.1:5001/actors/2 -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys, `actor_details`, `current_actor_id`, and `success` in the format below.
+```json
+{
+  "actor_details": {
+    "age": 40,
+    "city": "Nairobi",
+    "gender": "female",
+    "genre": "{Action,Thriller}",
+    "id": 2,
+    "image_link": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=2940&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=60",
+    "instagram_link": "http://instagram.com/lupita",
+    "name": "Lupita Nyongo",
+    "past_showings": [],
+    "past_showings_count": 0,
+    "seeking_casting": "false",
+    "seeking_description": "",
+    "state": "WA",
+    "upcoming_showings": [],
+    "upcoming_showings_count": 0,
+    "website_link": "http://google.com/lupita"
+  },
+  "current_actor_id": 2,
+  "success": true
+}
+```
+
+### GET /actors/create
+
+- Loads the form to create a new actor.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/actors/create -X GET -H "Content-Type: application/json"`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `get_form`, and `success` in the format below: 
+
+```json
+{
+  "get_form": true,
+  "success": true
+}
+```
+
+### POST /actors/create
+
+- Loads the form to create a new actor.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/actors/create -X POST -H "Content-Type: application/json" -d '{"name":"Mercy Test", "age":22, "gender":"female" ,"city":"Toronnno", "state":"WA", "genre":"Action", "instagram_link":"http://instagram.com/test", "website_link":"http://google.com/test", "image_link":"http://image.com/test", "seeking_casting":"true", "seeking_description":"desc test"}'`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `created_actor_name`, `success`, and `total_actors` in the format below: 
+
+```json
+{
+  "created_actor_name": "Mercy Test",
+  "success": true,
+  "total_actors": 35
+}
+```
+
+### GET /actors/<int:actor_id>/edit
+
+- Loads a pre-filled form to edit the details selected actor.
+- Request Arguments: `actor_id`
+- Curl example: `curl http://127.0.0.1:5001/actors/77/edit -X GET -H "Content-Type: application/json"`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `created_actor_name`, `success`, and `total_actors` in the format below: 
+
+```json
+{
+  "actor_id": 77,
+  "get_form": true,
+  "success": true
+}
+```
+
+### POST /actors/<int:actor_id>/edit
+- Loads a pre-filled form to edit the details selected actor.
+- Request Arguments: `actor_id`
+- Curl example: `curl http://127.0.0.1:5001/actors/77/edit -X POST -H "Content-Type: application/json" -d '{"name":"Mercy Test", "age":22, "gender":"female" ,"city":"Toronnno", "state":"WA", "genre":"Action", "instagram_link":"http://instagram.com/test", "website_link":"http://google.com/test", "image_link":"http://image.com/test", "seeking_casting":"true", "seeking_description":"desc test"}'`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `actor_id`, and `success` in the format below: 
+
+```json
+{
+  "actor_id": 77,
+  "success": true
+}
+```
+
+### GET /actors/<int:actor_id>/delete
+- Deletes the specified actor from the database.
+- Request Arguments: `actor_id`
+- Curl example: `curl http://127.0.0.1:5001/actors/30/edit -X GET -H "Content-Type: application/json"`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- **NOTE:** GET is used here because DELETE method cannot be accessed via the browser
+- Returns: An object with the keys: `deleted_actor_id`, `total_actors`, and `success` in the format below: 
+
+```json
+{
+  "deleted_actor_id": 30,
+  "success": true,
+  "total_actors": 34
+}
+```

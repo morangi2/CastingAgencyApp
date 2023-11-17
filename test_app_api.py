@@ -34,7 +34,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
 #   TEST BLOCK: ACTORS ENDPOINTS
 #  ----------------------------------------------------------------
 
-    """ 
+
     #testcase 1: test actors() == success
     def test_actors(self):
         response = app.test_client().get("/actors")
@@ -43,7 +43,8 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertTrue(data["total_actors"])
-
+        self.assertTrue(len(data["actors"]))
+    
     #testcase 2: test actors() == error
     def test_actors_404_error(self):
         response = app.test_client().get("/actorss")
@@ -57,14 +58,15 @@ class TestCastingAgencyMethods(unittest.TestCase):
 
     #testcase 3: test show_actor() == success
     def test_show_actor(self):
-        response = app.test_client().get("/actors/1")
+        response = app.test_client().get("/actors/75")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["current_actor"], 1)
+        self.assertEqual(data["current_actor_id"], 75)
+        self.assertTrue(len(data['actor_details']))
 
-
+    
     #testcase 4: test show_actor() == error
     def test_show_actor_404_error(self):
         response = app.test_client().get("/actors/1000")
@@ -74,7 +76,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["error"], 404)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
-
+    
     #testcase 5: test create_actor_form() == success
     def test_create_actor_form(self):
         response = app.test_client().get("/actors/create")
@@ -83,7 +85,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["get_form"], True)
-
+    
     #testcase 6: test create_actor_submission() == success
     def test_create_actor_submission(self):
         new_actor_json = json.loads(self.new_actor)
@@ -93,8 +95,8 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertTrue(data["total_actors"])
-        self.assertTrue(data["actor_name"])
-
+        self.assertTrue(data["created_actor_name"])
+    
     #testcase 7: test create_actor_submission() == error, wrong URL, 400; bad request
     def test_create_actor_submission_404_error(self):
         response = app.test_client().post("/actors/create/data")
@@ -104,17 +106,17 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["error"], 404)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
-
+    
     #testcase 8: test edit_actor_form() == success
     def test_edit_actor_form(self):
-        response = app.test_client().get("/actors/1/edit")
+        response = app.test_client().get("/actors/77/edit")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["get_form"], True)
-        self.assertEqual(data["actor_id"], 1)
-
+        self.assertEqual(data["actor_id"], 77)
+    
     #testcase 9: test edit_actor_submission() == success
     def test_edit_actor_submission(self):
         new_actor_json = json.loads(self.new_actor)
@@ -134,20 +136,22 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["error"], 404)
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
-
+    
     #testcase 11: test delete_actor() == success
     def test_delete_actor(self):
-        response = app.test_client().delete("/actors/49/delete")
+        response = app.test_client().get("/actors/67/delete")
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["deleted_actor_id"], 49)
+        self.assertEqual(data["deleted_actor_id"], 67)
         self.assertTrue(data["total_actors"])
 
     #testcase 12: test delete_actor() == error, wrong URL, 404; resource not found
     def test_delete_actor_404_error(self):
-        response = app.test_client().delete("/actors/44000/delete/nothing")
+        response = app.test_client().get("/actors/44000/delete")
+        print('***HAPAAA')
+        print(response)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -155,7 +159,7 @@ class TestCastingAgencyMethods(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Resource Not Found")
         
-    """
+    
 
 
 #  ----------------------------------------------------------------

@@ -338,6 +338,7 @@ def delete_actor(payload, actor_id):
       if actor_to_delete is None:
         flash('An error occured. Actor not found in our records.')
         abort(404)
+        #check error 415 if URL is http://127.0.0.1:5001/actors/44000/delete
       else:
         Actor.query.filter_by(id = actor_id).delete()
         db.session.commit()
@@ -409,7 +410,6 @@ def show_movie(payload, movie_id):
     try:
       movie_selected = Movie.query.get(movie_id)
       showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
-
       movie_selected_data = {}
 
       movie_selected_data['id'] = movie_selected.id
