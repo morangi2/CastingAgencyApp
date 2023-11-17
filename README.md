@@ -1,37 +1,108 @@
-## Full Stack Web Developer Nanodegree (CAPSTONE Project)
-This is the public repository for Udacity's Full-Stack Nanodegree capstone project. The starter-code of this project came from [Udacity's Fyrr app starte code](https://github.com/udacity/cd0046-SQL-and-Data-Modeling-for-the-Web)
+## CAST! The Casting Agency App
+CAST! is the name of this Casting Agency Application. The Executive Producer at CAST! had a major painpoint; that it was very difficult to trace which movie is assigned to which starring actor (and vice versa) and which showings have been confirmed alongside their respective details. As the lead software engineer, my main motivation for creating CAST! was to create a system to simplify and streamline the process of showcasing and accessing the details of movies, starring actors, and showings.
 
-----
+### How to access CAST!
+- Public URL: https://castingagency-mjko-c1b260bbded2.herokuapp.com/
+- **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
 
-## To run the app for the first time:
-- cd to the root directory (starter_code)
-- create and start your virtual environment
+### V1 of CAST! 
+This is what you currently see in this app, which incoporates 3 major functionalities;
+1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie.
+2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor.
+3. Showings; posting a new showwing which highlights the movie that will be showed, alongside the starring actor, and the date and time of the showing.
+
+### V2 of CAST!
+This will be the 2nd iteration of the app adding onto the functionality above as illustrated below;
+1. Movies; add the details of the producers of the movie
+2. Actors; include other actors (not just starring actors) and tag them accordingly
+3. Showings; include the details of the cinemas (and locations) where the showing will take place, and tag more actors in a given showing.
+
+### Appreciation
+My hearfelt appreciation to:
+1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
+2. My friends q_ode and Mo; for the motivation to push through :)
+
+
+------------------------------------
+
+## To run the app locally for the first time:
+1. **Download the project starter code locally**
 ```
-***
+git clone https://github.com/morangi2/CastingAgencyApp.git
+cd ******/starter_code 
+```
+2. **Create an empty repository in your GitHub online account. Change the remote repo path in your local repo, using the following commands:**
+```
+git remote -v 
+git remote remove origin 
+git remote add origin <https://github.com/<USERNAME>/<REPO_NAME>.git>
+git branch -M master
+```
+3. **Push your local repo into your GitHub account using the following commands:**
+```
+git add . --all   
+git commit -m "your comment"
+git push -u origin master
+```
+4. **Initialize and activate your virtual environment**
+```
+python3 -m venv myenv
 source venv/bin/activate
 ```
-- activate the setup environment; run
+>**Note** - In Windows, the `env` does not have a `bin` directory. Therefore, you'd use the analogous command shown below:
+```
+source env/Scripts/activate
+``` 
+5. **Install all the dependencies needed for this project:**
+```
+pip install -r requirements.txt
+```
+6. **Create the project database:**
+```
+createdb name_of_database
+```
+7. **Setup Migration to initialize your database schema:**
+```
+python3 manage.py db init # to initialize the migrations directory
+python3 manage.py db migrate # details the model changes to be made with upgrade and downgrade logic setup
+python3 manage.py db upgrade # to apply the migration
+```
+8. **Activate your environment variables in ```setup.sh```;**
 ```
 chmod +x setup.sh
 source setup.sh
 ```
-- ensure your postgress server is running
-- use the commands below to start the app
+>**Note** The shell script, ```setup.sh```, is not included in this repo as it contains a bunch of secret keys. You'll want to set this up for yourself locally in the format below:
+
+_A. Basic Environment Variables_
+```
+#!/bin/bash
+export DATABASE_URL="link_to_your_postgres_or_any_other_database"
+export DATABASE_URL_TEST="link_to_your_test_database"
+export SECRET_KEY='link_to_a_random_secret_key_to_use_on_your_config_file'
+```
+_B. Environment Variables if you are setting up authentication via Auth0_
+```
+export CALLBACK_URL='callback url here'
+export AUTH0_DOMAIN=' domain here'
+export ALGORITHMS=['hashing algorithm here']
+export API_AUDIENCE='api audience here'
+export CLIENT_ID='client ID here'
+export CLIENT_SECRET_KEY='client secret key here'
+```
+9. **Confirm that your postgress server is running:**
+```
+psql database_name
+```
+10. **Run the development server:**
 ```
 export FLASK_APP=myapp
 export FLASK_DEBUG=true
 export FLASK_ENV=development # enables debug mode
 python3 app.py
 ```
-
-
-
-## Introduction
-
-
-
-## Overview
-
+11. **Verify on the Browser**<br>
+Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5001/) or [http://localhost:5000](http://localhost:5001)
 
 
 ## Tech Stack (Dependencies)
@@ -43,15 +114,11 @@ Our tech stack will include the following:
  * **PostgreSQL** as our database of choice
  * **Python3** and **Flask** as our server language and server framework
  * **Flask-Migrate** for creating and running schema migrations
-You can download and install the dependencies mentioned above using `pip` as:
+
+You can download and install all the dependencies needed for this project using `pip` and reading from the requirements file as:
 ```
-pip install virtualenv
-pip install SQLAlchemy
-pip install postgres
-pip install Flask
-pip install Flask-Migrate
+pip install -r requirements.txt
 ```
-> **Note** - If we do not mention the specific version of a package, then the default latest stable package will be installed. 
 
 ### 2. Frontend Dependencies
 You must have the **HTML**, **CSS**, and **Javascript** with [Bootstrap 3](https://getbootstrap.com/docs/3.4/customize/) for our website's frontend. Bootstrap can only be installed by Node Package Manager (NPM). Therefore, if not already, download and install the [Node.js](https://nodejs.org/en/download/). Windows users must run the executable as an Administrator, and restart the computer after installation. After successfully installing the Node, verify the installation as shown below.
@@ -65,17 +132,33 @@ npm init -y
 npm install bootstrap@3
 ```
 
-
 ## Main Files: Project Structure
+Overall, this project is designed using the MVC Framework.
+* Models are located in `models.py`.
+* Views are located in `templates/`.
+* Controllers are located in `app.py`.
+* Web forms for creating data are located in `forms.py`
 
   ```sh
   ├── README.md
-  ├── app.py *** the main driver of the app. Includes your SQLAlchemy models.
-                    "python app.py" to run after installing dependencies
-  ├── config.py *** Database URLs, CSRF generation, etc
+  ├── app.py # the main driver of the app. Includes your SQLAlchemy models.
+  ├── app_api.py # the REST API of CAST!. Seperated from app.py to avoid a large monolith and to seperate API tests from the main application
+  ├── auth
+  │   ├── decorators.py # Defines "requires_auth" function, which is crucial for RBAC in this project.
+  │   ├── views.py # Defines the signup, login, logout and callback functions crucial for RBAC in this project.
+  ├── config.py # Database URLs, secret key setup, etc
   ├── error.log
-  ├── forms.py *** Your forms
-  ├── requirements.txt *** The dependencies we need to install with "pip3 install -r requirements.txt"
+  ├── fabfile.py
+  ├── forms.py # Your forms, pulling from WTForms, a flexible forms validation and rendering library for Python web development.
+  ├── manage.py # To setup Migration to initialize your database schema, and easily upgrade and downgrade
+  ├── migrations
+  │   ├── version # to easily upgrade and downgrade your data models using "python3 manage.py db action_here" where action can be migrate, upgrade or downgrade.
+  ├── models.py # for configuration of your data models, and app, db, and migrate objects.
+  ├── package.json # Functional metadata about this project
+  ├── Procfile # To deploy app.py on Heroku using gunicorn
+  ├── requirements.txt # The dependencies we need to install with "pip3 install -r requirements.txt"
+  ├── runtime.txt # The Python version that Heroku will use to run the deployed application
+  ├── test_app_api.py # Your API unit tests, excuted with "python test_app_api.py"
   ├── static
   │   ├── css 
   │   ├── font
@@ -88,93 +171,3 @@ npm install bootstrap@3
       ├── layouts
       └── pages
   ```
-
-Overall:
-* Models are located in the `MODELS` section of `app.py`.
-* Controllers are also located in `app.py`.
-* The web frontend is located in `templates/`, which builds static assets deployed to the web server at `static/`.
-* Web forms for creating data are located in `form.py`
-
-
-Highlight folders:
-* `templates/pages` -- (Already complete.) Defines the pages that are rendered to the site. These templates render views based on data passed into the template’s view, in the controllers defined in `app.py`. These pages successfully represent the data to the user, and are already defined for you.
-* `templates/layouts` -- (Already complete.) Defines the layout that a page can be contained in to define footer and header code for a given page.
-* `templates/forms` -- (Already complete.) Defines the forms used to create new artists, shows, and venues.
-* `app.py` -- (Missing functionality.) Defines routes that match the user’s URL, and controllers which handle data and renders views to the user. This is the main file you will be working on to connect to and manipulate the database and render views with data to the user, based on the URL.
-* Models in `app.py` -- (Missing functionality.) Defines the data models that set up the database tables.
-* `config.py` -- (Missing functionality.) Stores configuration variables and instructions, separate from the main application code. This is where you will need to connect to the database.
-
-
-Instructions
------
-
-1. Understand the Project Structure (explained above) and where important files are located.
-2. Build and run local development following the Development Setup steps below.
-3. Fill in the missing functionality in this application: this application currently pulls in fake data, and needs to now connect to a real database and talk to a real backend.
-4. Fill out every `TODO` section throughout the codebase. We suggest going in order of the following:
-    * Connect to a database in `config.py`. A project submission that uses a local database connection is fine.
-    * Using SQLAlchemy, set up normalized models for the objects we support in our web app in the Models section of `app.py`. Check out the sample pages provided at /artists/1, /venues/1, and /shows for examples of the data we want to model, using all of the learned best practices in database schema design. Implement missing model properties and relationships using database migrations via Flask-Migrate.
-    * Implement form submissions for creating new Venues, Artists, and Shows. There should be proper constraints, powering the `/create` endpoints that serve the create form templates, to avoid duplicate or nonsensical form submissions. Submitting a form should create proper new records in the database.
-    * Implement the controllers for listing venues, artists, and shows. Note the structure of the mock data used. We want to keep the structure of the mock data.
-    * Implement search, powering the `/search` endpoints that serve the application's search functionalities.
-    * Serve venue and artist detail pages, powering the `<venue|artist>/<id>` endpoints that power the detail pages.
-
-#### Data Handling with `Flask-WTF` Forms
-The starter codes use an interactive form builder library called [Flask-WTF](https://flask-wtf.readthedocs.io/). This library provides useful functionality, such as form validation and error handling. You can peruse the Show, Venue, and Artist form builders in `forms.py` file. The WTForms are instantiated in the `app.py` file. For example, in the `create_shows()` function, the Show form is instantiated from the command: `form = ShowForm()`. To manage the request from Flask-WTF form, each field from the form has a `data` attribute containing the value from user input. For example, to handle the `venue_id` data from the Venue form, you can use: `show = Show(venue_id=form.venue_id.data)`, instead of using `request.form['venue_id']`.
-
-Acceptance Criteria
------
-
-
-
-##### Stand Out
-
-
-
-
-## Development Setup
-1. **Download the project starter code locally**
-```
-git clone https://github.com/udacity/FSND.git
-cd ******/starter_code 
-```
-
-2. **Create an empty repository in your Github account online. To change the remote repository path in your local repository, use the commands below:**
-```
-git remote -v 
-git remote remove origin 
-git remote add origin <https://github.com/<USERNAME>/<REPO_NAME>.git>
-git branch -M master
-```
-Once you have finished editing your code, you can push the local repository to your Github account using the following commands.
-```
-git add . --all   
-git commit -m "your comment"
-git push -u origin master
-```
-
-3. **Initialize and activate a virtualenv using:**
-```
-python -m virtualenv env
-source env/bin/activate
-```
->**Note** - In Windows, the `env` does not have a `bin` directory. Therefore, you'd use the analogous command shown below:
-```
-source env/Scripts/activate
-```
-
-4. **Install the dependencies:**
-```
-pip install -r requirements.txt
-```
-
-5. **Run the development server:**
-```
-export FLASK_APP=myapp
-export FLASK_ENV=development # enables debug mode
-python3 app.py
-```
-
-6. **Verify on the Browser**<br>
-Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5000/) or [http://localhost:5000](http://localhost:5000) 
-

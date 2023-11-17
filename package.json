@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Mercy Orangi",
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^3.4.1"
