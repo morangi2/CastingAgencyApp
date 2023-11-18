@@ -1,6 +1,23 @@
 ## CAST! The Casting Agency App
 CAST! is the name of this Casting Agency Application. The Executive Producer at CAST! had a major painpoint; that it was very difficult to trace which movie is assigned to which starring actor (and vice versa) and which showings have been confirmed alongside their respective details. As the lead software engineer, my main motivation for creating CAST! was to create a system to simplify and streamline the process of showcasing and accessing the details of movies, starring actors, and showings.
 
+### Table of Contents
+1. [How to access CAST!](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#how-to-access-cast)
+2. [CAST! V1](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#cast-v1)
+3. [CAST! V2](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#cast-v2)
+4. [To run the app locally for the first time](https://github.com/morangi2/CastingAgencyApp#to-run-the-app-locally-for-the-first-time)
+5. [Tech Stack (Dependencies)](https://github.com/morangi2/CastingAgencyApp#tech-stack-dependencies)
+6. [Main Files: Project Structure](https://github.com/morangi2/CastingAgencyApp#main-files-project-structure)
+7. [Endpoints Documentation](https://github.com/morangi2/CastingAgencyApp#endpoints-documentation)
+8. [Actors Endpoints](https://github.com/morangi2/CastingAgencyApp#actors-endpoints)
+9. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
+10. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
+11. [Hosting on Heroku]()
+12. [Auhtentication with Auth0]()
+13. [Authorization with Auth0]()
+14. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
+
+
 ### How to access CAST!
 - Public URL: https://castingagency-mjko-c1b260bbded2.herokuapp.com/
 - **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
@@ -17,21 +34,10 @@ This will be the 2nd iteration of the app adding onto the functionality above as
 2. Actors; include other actors (not just starring actors) and tag them accordingly
 3. Showings; include the details of the cinemas (and locations) where the showing will take place, and tag more actors in a given showing.
 
-### Appreciation
-My hearfelt appreciation to:
-1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
-2. My friends q_ode and Mo; for the motivation to push through :)
+
 
 
 -----------------------------------
-### Table of Contents
-1. [To run the app locally for the first time](https://github.com/morangi2/CastingAgencyApp#to-run-the-app-locally-for-the-first-time)
-2. [Tech Stack (Dependencies)](https://github.com/morangi2/CastingAgencyApp#tech-stack-dependencies)
-3. [Main Files: Project Structure](https://github.com/morangi2/CastingAgencyApp#main-files-project-structure)
-4. [Endpoints Documentation](https://github.com/morangi2/CastingAgencyApp#endpoints-documentation)
-5. [Actors Endpoints](https://github.com/morangi2/CastingAgencyApp#actors-endpoints)
-6. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
-7. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
 
 
 
@@ -579,4 +585,21 @@ Curl Example:
 }
 ```
 
+
+## Hosting on Heroku
+- 
+
+
+## Auhtentication with Auth0
+-
+
+
+## Authorization with Auth0
+-
+
+
+## Appreciation
+My hearfelt appreciation to:
+1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
+2. My friends q_ode and Mo; for the motivation to push through :)
 
