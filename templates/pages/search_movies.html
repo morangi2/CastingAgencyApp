@@ -1,0 +1,17 @@
+{% extends 'layouts/main.html' %}
+{% block title %}CAST! | Movies Search{% endblock %}
+{% block content %}
+<h3>Number of search results for "{{ search_term }}": {{ results.count }}</h3>
+<ul class="items">
+	{% for movie in results.data %}
+	<li>
+		<a href="/movies/{{ movie.id }}">
+			<i class="fa fa-user"></i>
+			<div class="item">
+				<h5>{{ movie.title }}</h5>
+			</div>
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}

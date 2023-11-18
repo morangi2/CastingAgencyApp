@@ -14,6 +14,7 @@ import sys, time
 from models import *
 import os
 from auth.decorators import requires_auth, AuthError
+from sqlalchemy import and_, or_ 
 #----------------------------------------------------------------------------#
 # App Config.
 # NOTE: Refactored to file models.py == DONE
@@ -322,6 +323,55 @@ def edit_actor_submission(payload, actor_id):
     abort(AuthError)
 
 
+#  Search ACTOR
+#  ----------------------------------------------------------------
+@app.route('/actors/search', methods=['POST'])
+@requires_auth('search:actors')
+def search_actors(payload):
+  if 'search:actors' in payload['permissions']:
+    print('**** payload /actors/search POST *****')
+    print(payload['permissions'])
+
+    search_term = request.form['search_term']
+    search_term_incomplete = '%' + search_term + '%'
+
+    #search by city AND state if someone enters both, comma separated eg searching for "Toronto, ON" will give you actors specifically under Toronto, ON
+    search_term_city = ''
+    search_term_state = ''
+    search_term_split = search_term.split(', ')
+    length_of_split = len(search_term_split)
+
+    if length_of_split == 2:
+      #seperate by the comma
+      search_term_city = search_term_split[0]
+      search_term_state = search_term_split[1]
+    else:
+      search_term_city = search_term
+      search_term_state = search_term
+
+    search_response = {}
+    search_response['count'] = 0
+    search_response['data'] = []
+
+    # below: search by incomplete name, or specific city, or specific state
+    actors_from_search = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city))))
+    actors_from_search_count = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city)))).count()
+
+    for actor in actors_from_search:
+      this_actor = {}
+      this_actor['id'] = actor.id
+      this_actor['name'] = actor.name
+      this_actor['num_upcoming_showings'] = Showing.query.filter_by(actor_id = Actor.id).count()
+
+      search_response['count'] = actors_from_search_count
+      search_response['data'].append(this_actor)
+
+    return render_template('pages/search_actors.html', results=search_response, search_term=search_term)
+  
+  else:
+    abort(AuthError)
+
+
 #  Delete ACTOR
 #  ----------------------------------------------------------------
 @app.route('/actors/<int:actor_id>/delete', methods=['GET'])
@@ -617,6 +667,40 @@ def edit_movie_submission(payload, movie_id):
   else:
     abort(AuthError)
 
+
+#  Search MOVIE
+#  ----------------------------------------------------------------
+@app.route('/movies/search', methods=['POST'])
+@requires_auth('search:movies')
+def search_movies(payload):
+  if 'search:movies' in payload['permissions']:
+    print('**** payload /movies/search POST *****')
+    print(payload['permissions'])
+
+    search_term = request.form['search_term']
+    search_term_incomplete = '%' + search_term + '%'
+
+    search_response = {}
+    search_response['count'] = 0
+    search_response['data'] = []
+
+    # below: search by incomplete movie title or complete movie title
+    movies_from_search = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete)))
+    movies_from_search_count = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete))).count()
+
+    for movie in movies_from_search:
+      this_movie = {}
+      this_movie['id'] = movie.id
+      this_movie['title'] = movie.title
+      this_movie['num_upcoming_showings'] = Showing.query.filter_by(movie_id = Movie.id).count()
+
+      search_response['count'] = movies_from_search_count
+      search_response['data'].append(this_movie)
+
+    return render_template('pages/search_movies.html', results=search_response, search_term=search_term)
+  
+  else:
+    abort(AuthError)
 
 
 #  Delete MOVIE

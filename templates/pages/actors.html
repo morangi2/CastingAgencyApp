@@ -1,5 +1,5 @@
 {% extends 'layouts/main.html' %}
-{% block title %}CAST | Actors{% endblock %}
+{% block title %}CAST! | Actors{% endblock %}
 {% block content %}
 {% for actor in actors %}
 <h3>{{ actor.city }}, {{ actor.state }}</h3>
@@ -7,7 +7,7 @@
 		{% for actor in actor.actors %}
 		<li>
 			<a href="/actors/{{ actor.id }}">
-				<i class="fas fa-music"></i>
+				<i class="fa fa-user"></i>
 				<div class="item">
 					<h5>{{ actor.name }}</h5>
 				</div>

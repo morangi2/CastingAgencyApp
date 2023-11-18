@@ -18,7 +18,7 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 12. [Continuous Deployment via GitHub](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#continuous-deployment-via-github)
 13. [Creating a new Heroku Postgres Database Mid-project](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#creating-a-new-heroku-postgres-database-mid-project)
 14. [Authentication with Auth0](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#authentication-with-auth0)
-15. [Setting up Role-Based Access Control with Auth0](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#authorization-with-auth0)
+15. [Setting up Role-Based Access Control with Auth0](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#setting-up-role-based-access-control-with-auth0)
 16. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
 
 ----------------------------------------------------------------------
@@ -29,9 +29,9 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 - **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
 
 ### CAST! V1
-This is what you currently see in this app, which incoporates 4 major functionalities;
-1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie.
-2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor.
+This is what you currently experience in this app, which incoporates 4 major functionalities;
+1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie, searching for a movie either by a partial name or full name.
+2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor, searching for an actor by the state or city they reside in or by their partial or full name.
 3. Showings; posting a new showwing which highlights the movie that will be showed, alongside the starring actor, and the date and time of the showing.
 4. Search movies & actors; ***
 
@@ -703,7 +703,7 @@ export CLIENT_SECRET_KEY='client secret key here'
 ## Setting up Role-Based Access Control with Auth0
 - Access of CAST! features is controlled via RBAC on Auth0.
 - The homepage is the only view that is not access-controlled.
-- For a detailed guide on how to set-up RBAC on your Flask/Python app on Auth0, [follow this offiial Auth0 guide.](https://developer.auth0.com/resources/code-samples/api/flask/basic-role-based-access-control)
+- For a detailed guide on how to set-up RBAC on your Flask/Python app on Auth0, [follow this official Auth0 guide.](https://developer.auth0.com/resources/code-samples/api/flask/basic-role-based-access-control)
 - There are 3 key roles featured with varying access levels as outlined below:
 
 | Casting Assistant | Casting Director | Executive Producer |
