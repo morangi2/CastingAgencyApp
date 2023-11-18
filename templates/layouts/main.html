@@ -84,10 +84,10 @@
           </ul>
           <div class="nav-bar__buttons">
             {% if session.user %} <!-- if user is logged in, display ONLY the logout button-->
-              <a href="{{ url_for('auth.logout') }}" class="button__logout">Log Out</a>
+              <a href="{{ url_for('auth.logout') }}"><button class="btn btn-outline-warning">Log Out</button></a>
             {% else %} <!-- user is not logged in, show both login and signup buttons-->
-                <a href="{{ url_for('auth.login') }}" class="button__login">Log In</a>
-                <a href="{{ url_for('auth.signup') }}" class="button__sign-up">Sign Up</a>
+              <a href="{{ url_for('auth.login') }}"><button class="btn btn-outline-warning">Log In</button></a>
+               <a href="{{ url_for('auth.signup') }}"><button class="btn btn-outline-warning">Sign Up</button></a>
             {% endif %}
           </div>
         </div><!--/.nav-collapse -->
