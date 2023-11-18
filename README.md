@@ -1,6 +1,8 @@
 ## CAST! The Casting Agency App
 CAST! is the name of this Casting Agency Application. The Executive Producer at CAST! had a major painpoint; that it was very difficult to trace which movie is assigned to which starring actor (and vice versa) and which showings have been confirmed alongside their respective details. As the lead software engineer, my main motivation for creating CAST! was to create a system to simplify and streamline the process of showcasing and accessing the details of movies, starring actors, and showings.
 
+----------------------------------------------------------------------
+
 ### Table of Contents
 1. [How to access CAST!](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#how-to-access-cast)
 2. [CAST! V1](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#cast-v1)
@@ -13,9 +15,11 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 9. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
 10. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
 11. [Hosting on Heroku]()
-12. [Auhtentication with Auth0]()
+12. [Authentication with Auth0]()
 13. [Authorization with Auth0]()
 14. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
+
+----------------------------------------------------------------------
 
 
 ### How to access CAST!
@@ -23,23 +27,18 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 - **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
 
 ### CAST! V1
-This is what you currently see in this app, which incoporates 3 major functionalities;
+This is what you currently see in this app, which incoporates 4 major functionalities;
 1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie.
 2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor.
 3. Showings; posting a new showwing which highlights the movie that will be showed, alongside the starring actor, and the date and time of the showing.
+4. Search movies & actors; ***
 
 ### CAST! V2
 This will be the 2nd iteration of the app adding onto the functionality above as illustrated below;
 1. Movies; add the details of the producers of the movie
 2. Actors; include other actors (not just starring actors) and tag them accordingly
 3. Showings; include the details of the cinemas (and locations) where the showing will take place, and tag more actors in a given showing.
-
-
-
-
------------------------------------
-
-
+4. Authentication; Provide a passwordless option for log in
 
 
 ------------------------------------
@@ -586,8 +585,58 @@ Curl Example:
 ```
 
 
-## Hosting on Heroku
-- 
+## Hosting on Heroku (Deplyment via CLI and Git)
+- Signup on [Heroku](https://signup.heroku.com/)
+- Install the Heroku CLI by running the command below (you'll be prompted to login too):
+```
+curl https://cli-assets.heroku.com/install.sh | sh
+```
+- Build your application locally.
+>**Note** - This includes generating your migration files which we use in this project to create our Data models in the postgres database. Use the commands below to run your migrations;
+```
+python3 manage.py db init #to initialize your migrations file
+python3 manage.py db migrate #to create a new migration file
+python3 manage.py db upgrade #to apply the migration created; upgrade can be changed to downgrade to rollback the migration
+```
+- Create a file, ```Procfile```, in your root directory, and add the command below:
+```
+web: gunicorn app:app
+```
+- Create a file, ```runtime.txt```, in your root directory, and add the Python version Heroku will use to run your deployed application, example below:
+```
+python-3.9.18
+```
+- Add heroku as a remote
+```
+git init #initialize a git repo for your project
+git remote add heroku #add heroku as a remote
+git branch -M main
+git add . #to add all the files you want to track on Heroku
+git commit -m "initial commit"
+```
+- [Create a Heroku application](https://devcenter.heroku.com/articles/creating-apps) with the folling command on CLI:
+```
+heroku create my-amazing-application
+```
+- Add [Heroku Postgres](https://www.heroku.com/postgres) as a resource under your heroku application via your Heroku dashboard or via CLI with the command below. This will add a postgres database on heroku that can be used by your application.
+```
+heroku addons:create heroku-postgresql:PLAN_NAME
+```
+- Push the Git repository you've created using the command below to trigger the build and deploy process:
+```
+git push heroku main
+```
+- Run the latest database migration on heroku CLI to create the latest database model on your app on Heroku. (_my-amazing-application_ is the name of my app on Heroku)
+```
+heroku run python manage.py db upgrade --app my-amazing-application
+```
+- Test your Heroku-hosted application online. You can either run the command below on CLI, or check heroku logs or your Heroku dashboard for the URL.
+```
+heroku open
+```
+
+### Continuous Deployment via GitHub
+- To make it easy to deply code on GitHub to your app on Heroku, you can setup Heroku GitHub deployments by following the [steps on this tutorial.](https://devcenter.heroku.com/articles/github-integration)
 
 
 ## Auhtentication with Auth0
@@ -601,5 +650,5 @@ Curl Example:
 ## Appreciation
 My hearfelt appreciation to:
 1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
-2. My friends q_ode and Mo; for the motivation to push through :)
+2. My friends Ade, Warugz, and Soni; for the motivation to push through :)
 
