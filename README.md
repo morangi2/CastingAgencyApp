@@ -5,13 +5,13 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 - Public URL: https://castingagency-mjko-c1b260bbded2.herokuapp.com/
 - **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
 
-### V1 of CAST! 
+### CAST! V1
 This is what you currently see in this app, which incoporates 3 major functionalities;
 1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie.
 2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor.
 3. Showings; posting a new showwing which highlights the movie that will be showed, alongside the starring actor, and the date and time of the showing.
 
-### V2 of CAST!
+### CAST! V2
 This will be the 2nd iteration of the app adding onto the functionality above as illustrated below;
 1. Movies; add the details of the producers of the movie
 2. Actors; include other actors (not just starring actors) and tag them accordingly
@@ -21,6 +21,19 @@ This will be the 2nd iteration of the app adding onto the functionality above as
 My hearfelt appreciation to:
 1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
 2. My friends q_ode and Mo; for the motivation to push through :)
+
+
+-----------------------------------
+### Table of Contents
+1. [To run the app locally for the first time](https://github.com/morangi2/CastingAgencyApp#to-run-the-app-locally-for-the-first-time)
+2. [Tech Stack (Dependencies)](https://github.com/morangi2/CastingAgencyApp#tech-stack-dependencies)
+3. [Main Files: Project Structure](https://github.com/morangi2/CastingAgencyApp#main-files-project-structure)
+4. [Endpoints Documentation](https://github.com/morangi2/CastingAgencyApp#endpoints-documentation)
+5. [Actors Endpoints](https://github.com/morangi2/CastingAgencyApp#actors-endpoints)
+6. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
+7. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
+
+
 
 
 ------------------------------------
