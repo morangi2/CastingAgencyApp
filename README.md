@@ -15,10 +15,10 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 9. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
 10. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
 11. [Hosting on Heroku](https://github.com/morangi2/CastingAgencyApp#hosting-on-heroku-deplyment-via-cli-and-git)
-12. [Continuous Deployment via GitHub]()
-13. [Creating a new Heroku Postgres Database Mid-project]()
-14. [Authentication with Auth0]()
-15. [Authorization with Auth0](https://github.com/morangi2/CastingAgencyApp#authorization-with-auth0)
+12. [Continuous Deployment via GitHub](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#continuous-deployment-via-github)
+13. [Creating a new Heroku Postgres Database Mid-project](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#creating-a-new-heroku-postgres-database-mid-project)
+14. [Authentication with Auth0](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#authentication-with-auth0)
+15. [Setting up Role-Based Access Control with Auth0](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#authorization-with-auth0)
 16. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
 
 ----------------------------------------------------------------------
@@ -124,6 +124,7 @@ python3 app.py
 11. **Verify on the Browser**<br>
 Navigate to project homepage [http://127.0.0.1:5000/](http://127.0.0.1:5001/) or [http://localhost:5000](http://localhost:5001)
 
+----------------------------------------------------------------------
 
 ## Tech Stack (Dependencies)
 
@@ -151,6 +152,8 @@ Install [Bootstrap 3](https://getbootstrap.com/docs/3.3/getting-started/) for th
 npm init -y
 npm install bootstrap@3
 ```
+
+----------------------------------------------------------------------
 
 ## Main Files: Project Structure
 Overall, this project is designed using the MVC Framework.
@@ -192,6 +195,8 @@ Overall, this project is designed using the MVC Framework.
       └── pages
   ```
 
+----------------------------------------------------------------------
+
 ## Endpoints Documentation
 
 Below is a detailed documentation of the API endpoints including the URL, request parameters, and the response body. Use the examples below as a reference.
@@ -214,6 +219,8 @@ Curl Example:
 ```
 `curl http://127.0.0.1:5001/actors -X GET -H "Content-Type: application/json"`
 ```
+
+----------------------------------------------------------------------
 
 ## ACTORS Endpoints
 
@@ -371,6 +378,7 @@ Curl Example:
 }
 ```
 
+----------------------------------------------------------------------
 
 ## MOVIES Endpoints
 
@@ -518,6 +526,7 @@ Curl Example:
 }
 ```
 
+----------------------------------------------------------------------
 
 ## SHOWINGS Endpoints
 ### GET /showings
@@ -586,6 +595,7 @@ Curl Example:
 }
 ```
 
+----------------------------------------------------------------------
 
 ## Hosting on Heroku (Deplyment via CLI and Git)
 - Signup on [Heroku](https://signup.heroku.com/)
@@ -657,25 +667,60 @@ python3 manage.py db migrate # details the model changes to be made with upgrade
 python3 manage.py db upgrade # to apply the migration
 ```
 - Push your project changes to GitHub, then deploy to Heroku.
-- Delete the existing database on Heroku via Heroku Dashboard --> Resources.
+- Delete the existing database on Heroku via Heroku Dashboard --> Your applicaion --> Resources.
 - Add a new Heroku Postgres database under _Resources_ on your Heroku dashboard.
 - Run the latest migration upgrade on your Heroku database via CLI with the command below:
 ```
 heroku run python manage.py db upgrade --app YOUR_HEROKU_APP_NAME
 ```
+- Add any _Config Variables_, e.g. Auth0 configuration variables, under Dashboard --> Your application --> Settings. 
 - To check the changes on your Heroku database via CLI, run:
 ```
 heroku psql
 ```
 
+----------------------------------------------------------------------
 
 ## Authentication with Auth0
--
+- Follow the instructions on [this official Auth0 page](https://developer.auth0.com/resources/guides/web-app/flask/basic-authentication#create-the-login-button) on how to setup authentication on your application.
+- Additionally for this application:
+
+1. A shell script, ```setup.sh```, was used to setup the Auth0 configuration variables to our Flask app. This file is not included in this repo as it contains a bunch of secret keys. You'll want to set this up for yourself locally in the format below:
+```
+export CALLBACK_URL='callback url here'
+export AUTH0_DOMAIN=' domain here'
+export ALGORITHMS=['hashing algorithm here']
+export API_AUDIENCE='api audience here'
+export CLIENT_ID='client ID here'
+export CLIENT_SECRET_KEY='client secret key here'
+```
+
+2. ```auth/decorators.py``` and ```auth/views.py``` are the 2 main files that have been used to setup the authentication flow with Auth0.
 
 
-## Authorization with Auth0
--
+----------------------------------------------------------------------
 
+## Setting up Role-Based Access Control with Auth0
+- Access of CAST! features is controlled via RBAC on Auth0.
+- The homepage is the only view that is not access-controlled.
+- For a detailed guide on how to set-up RBAC on your Flask/Python app on Auth0, [follow this offiial Auth0 guide.](https://developer.auth0.com/resources/code-samples/api/flask/basic-role-based-access-control)
+- There are 3 key roles featured with varying access levels as outlined below:
+
+| Casting Assistant | Casting Director | Executive Producer |
+| ----------------- | ---------------- | ------------------ |
+| get:actors   | get:actors     | get:actors    |
+| get:movies     | get:movies       | get:movies      |
+| get:showings     | get:showings       | get:showings      |
+| --     | post:actors       | post:actors      |
+| --     | delete:actors       | delete:actors      |
+| --     | patch:actors       | patch:actors      |
+| --     | patch:movies       | patch:movies      |
+| --     | --       | post:movies      |
+| --     | --       | delete:movies      |
+| --     | --       | post:showings      |
+
+
+----------------------------------------------------------------------
 
 ## Appreciation
 My hearfelt appreciation to:
