@@ -355,7 +355,7 @@ def delete_actor(actor_id):
     
     except Exception as e:
         print(e)
-        abort(404)
+        abort(415)
 
     finally:
        db.session.close()
@@ -628,7 +628,7 @@ def delete_movie(movie_id):
     
     except Exception as e:
       print(e)
-      abort(404)
+      abort(415)
 
     finally:
       db.session.close()
@@ -643,9 +643,17 @@ def delete_movie(movie_id):
 
 @app.route('/showings/create', methods=['GET'])
 def create_showing_form():
-    form = ShowingForm()
-
-    return render_template('forms/new_showing.html', form = form)
+    try:
+        form = ShowingForm()
+    except Exception as e:
+       print(e)
+       abort(404)
+    return jsonify(
+       {
+          "success": True,
+          "get_form": True
+       }
+    )
 
 
 
@@ -708,7 +716,8 @@ def showings():
         return jsonify(
            {
               "success": True,
-              "total_showings": len(showings)
+              "total_showings": len(showings),
+              "all_showings": all_showings
            }
         )
     

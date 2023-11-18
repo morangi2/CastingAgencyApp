@@ -337,7 +337,7 @@ def delete_actor(payload, actor_id):
     try:
       if actor_to_delete is None:
         flash('An error occured. Actor not found in our records.')
-        abort(404)
+        abort(415)
         #check error 415 if URL is http://127.0.0.1:5001/actors/44000/delete
       else:
         Actor.query.filter_by(id = actor_id).delete()
@@ -352,7 +352,7 @@ def delete_actor(payload, actor_id):
     if error:
       error = False
       flash('An error occured. Actor not deleted.')
-      abort(404)
+      abort(415)
     
     return redirect(url_for('index'))
   
@@ -766,6 +766,10 @@ def showings(payload):
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('errors/404.html'), 404
+
+@app.errorhandler(415)
+def not_found_error(error):
+    return render_template('errors/404.html'), 415
 
 
 @app.errorhandler(500)

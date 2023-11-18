@@ -499,3 +499,71 @@ Curl Example:
 ```
 
 
+## SHOWINGS Endpoints
+### GET /showings
+
+- Fetches a dictionary of all the showings.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/showings -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys, `all_showings`, `success`, and `total_showings` in the format below.
+
+```json
+{
+  "all_showings": [
+    {
+      "actor_id": 1,
+      "actor_name": "Sylvester Stallone",
+      "id": 2,
+      "movie_id": 4,
+      "movie_image_link": "http://unsplash.com/image",
+      "movie_title": "SLY",
+      "start_time": "2023-11-11 15:02:42"
+    },
+    {
+      "actor_id": 3,
+      "actor_name": "Lupita Nyongo",
+      "id": 4,
+      "movie_id": 3,
+      "movie_image_link": "http://unsplash.com/image",
+      "movie_title": "Black Panther",
+      "start_time": "2023-11-11 16:07:50"
+    }
+  ],
+  "success": true,
+  "total_showings": 2
+}
+```
+
+
+### GET /showings/create
+- Loads the form to create a new showing.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/showings/create -X GET -H "Content-Type: application/json"`
+- Failed query will return a 404 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `get_form`, and `success` in the format below: 
+
+```json
+{
+  "get_form": true,
+  "success": true
+}
+```
+
+### POST /showings/create
+
+- Posts the details of the new showing.
+- Request Arguments: None
+- Curl example: `curl http://127.0.0.1:5001/showings/create -X POST -H "Content-Type: application/json" -d '{"actor_id":3, "movie_id":4, "start_time":"2024-11-10 13:45:38"}'`
+- Failed query will return a 400 error. See Errors section below for more details of the `key:value` pairs returned.
+- Returns: An object with the keys: `showing_lead_actor_id`, `success`, and `total_showings` in the format below: 
+
+```json
+{
+  "showing_lead_actor_id": 3,
+  "success": true,
+  "total_showings": 7
+}
+```
+
+
