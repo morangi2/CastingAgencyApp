@@ -15,9 +15,11 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 9. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
 10. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
 11. [Hosting on Heroku](https://github.com/morangi2/CastingAgencyApp#hosting-on-heroku-deplyment-via-cli-and-git)
-12. [Authentication with Auth0]()
-13. [Authorization with Auth0](https://github.com/morangi2/CastingAgencyApp#authorization-with-auth0)
-14. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
+12. [Continuous Deployment via GitHub]()
+13. [Creating a new Heroku Postgres Database Mid-project]()
+14. [Authentication with Auth0]()
+15. [Authorization with Auth0](https://github.com/morangi2/CastingAgencyApp#authorization-with-auth0)
+16. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
 
 ----------------------------------------------------------------------
 
@@ -637,6 +639,34 @@ heroku open
 
 ### Continuous Deployment via GitHub
 - To make it easy to deply code on GitHub to your app on Heroku, you can setup Heroku GitHub deployments by following the [steps on this tutorial.](https://devcenter.heroku.com/articles/github-integration)
+
+
+### Creating a new Heroku Postgres Database mid-project
+Follow the instructions below if you are setting up  your database and data models afresh mid-project i.e. after the initial setup.
+
+- Delete the ```Migrations``` directory on your local repository.
+- Delete and then create the database locally with the commands below:
+```
+dropdb NAME_OF_OLD_DB
+createdb NAME_OF_NEW_DB
+```
+- Create a new migration and upgrade using the commands below:
+```
+python3 manage.py db init # to initialize the migrations directory
+python3 manage.py db migrate # details the model changes to be made with upgrade and downgrade logic setup
+python3 manage.py db upgrade # to apply the migration
+```
+- Push your project changes to GitHub, then deploy to Heroku.
+- Delete the existing database on Heroku via Heroku Dashboard --> Resources.
+- Add a new Heroku Postgres database under _Resources_ on your Heroku dashboard.
+- Run the latest migration upgrade on your Heroku database via CLI with the command below:
+```
+heroku run python manage.py db upgrade --app YOUR_HEROKU_APP_NAME
+```
+- To check the changes on your Heroku database via CLI, run:
+```
+heroku psql
+```
 
 
 ## Authentication with Auth0
