@@ -14,9 +14,9 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 8. [Actors Endpoints](https://github.com/morangi2/CastingAgencyApp#actors-endpoints)
 9. [Movies Endpoints](https://github.com/morangi2/CastingAgencyApp#movies-endpoints)
 10. [Showings Endpoints](https://github.com/morangi2/CastingAgencyApp#showings-endpoints)
-11. [Hosting on Heroku]()
+11. [Hosting on Heroku](https://github.com/morangi2/CastingAgencyApp#hosting-on-heroku-deplyment-via-cli-and-git)
 12. [Authentication with Auth0]()
-13. [Authorization with Auth0]()
+13. [Authorization with Auth0](https://github.com/morangi2/CastingAgencyApp#authorization-with-auth0)
 14. [Appreciation](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#appreciation)
 
 ----------------------------------------------------------------------
@@ -639,7 +639,7 @@ heroku open
 - To make it easy to deply code on GitHub to your app on Heroku, you can setup Heroku GitHub deployments by following the [steps on this tutorial.](https://devcenter.heroku.com/articles/github-integration)
 
 
-## Auhtentication with Auth0
+## Authentication with Auth0
 -
 
 
