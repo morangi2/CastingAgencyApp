@@ -711,6 +711,8 @@ export CLIENT_SECRET_KEY='client secret key here'
 | get:actors   | get:actors     | get:actors    |
 | get:movies     | get:movies       | get:movies      |
 | get:showings     | get:showings       | get:showings      |
+| search:actors     | search:actors       | search:actors      |
+| search:movies     | search:movies       | search:movies      |
 | --     | post:actors       | post:actors      |
 | --     | delete:actors       | delete:actors      |
 | --     | patch:actors       | patch:actors      |
