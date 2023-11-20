@@ -59,105 +59,105 @@ def index():
 #  Show ALL ACTORS
 #  ----------------------------------------------------------------
 @app.route('/actors')
-@requires_auth('get:actors')
-def actors(payload):
-  if 'get:actors' in payload['permissions']:
+#@requires_auth('get:actors')
+def actors():
+  """ if 'get:actors' in payload['permissions']:
     print('**** payload /actors *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    try:
-      actors_list = Actor.query.distinct('city')
-      actors = []
+  try:
+    actors_list = Actor.query.distinct('city')
+    actors = []
 
-      for one_actor in actors_list:
-        actor_data = {}
-        """ actor_data['name'] = one_actor.name
-        actor_data['age'] = one_actor.age
-        actor_data['gender'] = one_actor.gender """
-        actor_data['city'] = one_actor.city
-        actor_data['state'] = one_actor.state
-        actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
-        actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
-        actors.append(actor_data)
+    for one_actor in actors_list:
+      actor_data = {}
+      """ actor_data['name'] = one_actor.name
+      actor_data['age'] = one_actor.age
+      actor_data['gender'] = one_actor.gender """
+      actor_data['city'] = one_actor.city
+      actor_data['state'] = one_actor.state
+      actor_data['actors'] = Actor.query.filter_by(city = one_actor.city)
+      actor_data['num_upcoming_showings'] = Showing.query.filter_by(actor_id = one_actor.id).count()
+      actors.append(actor_data)
 
-      return render_template('pages/actors.html', actors=actors)
-    
-    except Exception as e:
-      print(e)
-      abort(404)
+    return render_template('pages/actors.html', actors=actors)
+  
+  except Exception as e:
+    print(e)
+    abort(404)
 
-  else:
-    abort(AuthError)
+  """ else:
+    abort(AuthError) """
   
 
 #  Show ONE ACTOR
 #  ----------------------------------------------------------------
 @app.route('/actors/<int:actor_id>')
-@requires_auth('get:actors')
-def show_actor(payload, actor_id):
-  if 'get:actors' in payload['permissions']:
+#@requires_auth('get:actors')
+def show_actor(actor_id):
+  """ if 'get:actors' in payload['permissions']:
     print('****payload /actors/ID*****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
+  error = False
+
+  try:
+    actor_selected_data = {}
+    actor_selected = Actor.query.get(actor_id)
+    showings_joinedwith_movies = Showing.query.filter_by(actor_id=actor_id).join(Movie).all()
+
+    actor_selected_data['id'] = actor_selected.id
+    actor_selected_data['name'] = actor_selected.name
+    actor_selected_data['age'] = actor_selected.age
+    actor_selected_data['gender'] = actor_selected.gender
+    actor_selected_data['city'] = actor_selected.city
+    actor_selected_data['state'] = actor_selected.state
+    actor_selected_data['genre'] = actor_selected.genre
+    actor_selected_data['instagram_link'] = actor_selected.instagram_link
+    actor_selected_data['website_link'] = actor_selected.website_link
+    actor_selected_data['image_link'] = actor_selected.image_link
+    actor_selected_data['seeking_casting'] = actor_selected.seeking_casting
+    actor_selected_data['seeking_description'] = actor_selected.seeking_description
+    actor_selected_data['upcoming_showings_count'] = 0
+    actor_selected_data['upcoming_showings'] = []
+    actor_selected_data['past_showings_count'] = 0
+    actor_selected_data['past_showings'] = []
+
+    for showing in showings_joinedwith_movies:
+      this_showing = {}
+      this_showing['actor_id'] = showing.actor_id
+      this_showing['actor_image_link'] = showing.actor.image_link
+      this_showing['actor_name'] = showing.actor.name
+      this_showing['start_time'] = showing.start_time
+      this_showing['movie_id'] = showing.movie.id
+      this_showing['movie_title'] = showing.movie.title
+      this_showing['movie_image_link'] = showing.movie.image_link
+
+      showing_start_time = showing.start_time
+      showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+      timestamp_db = datetime.timestamp(showing_start_time_formatted)
+      timestamp_current = time.time()
+
+      if timestamp_current > timestamp_db:
+        actor_selected_data['past_showings_count'] += 1
+        actor_selected_data['past_showings'].append(this_showing)
+      else:
+        actor_selected_data['upcoming_showings_count'] += 1
+        actor_selected_data['upcoming_showings'].append(this_showing)
+
+    return render_template('pages/show_actor.html', actor=actor_selected_data)
+
+  except:
+    error = True
+    print(sys.exc_info())
+
+  if error:
     error = False
-
-    try:
-      actor_selected_data = {}
-      actor_selected = Actor.query.get(actor_id)
-      showings_joinedwith_movies = Showing.query.filter_by(actor_id=actor_id).join(Movie).all()
-
-      actor_selected_data['id'] = actor_selected.id
-      actor_selected_data['name'] = actor_selected.name
-      actor_selected_data['age'] = actor_selected.age
-      actor_selected_data['gender'] = actor_selected.gender
-      actor_selected_data['city'] = actor_selected.city
-      actor_selected_data['state'] = actor_selected.state
-      actor_selected_data['genre'] = actor_selected.genre
-      actor_selected_data['instagram_link'] = actor_selected.instagram_link
-      actor_selected_data['website_link'] = actor_selected.website_link
-      actor_selected_data['image_link'] = actor_selected.image_link
-      actor_selected_data['seeking_casting'] = actor_selected.seeking_casting
-      actor_selected_data['seeking_description'] = actor_selected.seeking_description
-      actor_selected_data['upcoming_showings_count'] = 0
-      actor_selected_data['upcoming_showings'] = []
-      actor_selected_data['past_showings_count'] = 0
-      actor_selected_data['past_showings'] = []
-
-      for showing in showings_joinedwith_movies:
-        this_showing = {}
-        this_showing['actor_id'] = showing.actor_id
-        this_showing['actor_image_link'] = showing.actor.image_link
-        this_showing['actor_name'] = showing.actor.name
-        this_showing['start_time'] = showing.start_time
-        this_showing['movie_id'] = showing.movie.id
-        this_showing['movie_title'] = showing.movie.title
-        this_showing['movie_image_link'] = showing.movie.image_link
-
-        showing_start_time = showing.start_time
-        showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
-        timestamp_db = datetime.timestamp(showing_start_time_formatted)
-        timestamp_current = time.time()
-
-        if timestamp_current > timestamp_db:
-          actor_selected_data['past_showings_count'] += 1
-          actor_selected_data['past_showings'].append(this_showing)
-        else:
-          actor_selected_data['upcoming_showings_count'] += 1
-          actor_selected_data['upcoming_showings'].append(this_showing)
-
-      return render_template('pages/show_actor.html', actor=actor_selected_data)
-
-    except:
-      error = True
-      print(sys.exc_info())
-
-    if error:
-      error = False
-      flash('This actor does NOT exist in our records.')
-      return render_template('pages/home.html')
+    flash('This actor does NOT exist in our records.')
+    return render_template('pages/home.html')
     
-  else:
-    abort(AuthError)
+  """ else:
+    abort(AuthError) """
 
 
 #  Create ACTOR
@@ -326,50 +326,50 @@ def edit_actor_submission(payload, actor_id):
 #  Search ACTOR
 #  ----------------------------------------------------------------
 @app.route('/actors/search', methods=['POST'])
-@requires_auth('search:actors')
-def search_actors(payload):
-  if 'search:actors' in payload['permissions']:
+#@requires_auth('search:actors')
+def search_actors():
+  """ if 'search:actors' in payload['permissions']:
     print('**** payload /actors/search POST *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    search_term = request.form['search_term']
-    search_term_incomplete = '%' + search_term + '%'
+  search_term = request.form['search_term']
+  search_term_incomplete = '%' + search_term + '%'
 
-    #search by city AND state if someone enters both, comma separated eg searching for "Toronto, ON" will give you actors specifically under Toronto, ON
-    search_term_city = ''
-    search_term_state = ''
-    search_term_split = search_term.split(', ')
-    length_of_split = len(search_term_split)
+  #search by city AND state if someone enters both, comma separated eg searching for "Toronto, ON" will give you actors specifically under Toronto, ON
+  search_term_city = ''
+  search_term_state = ''
+  search_term_split = search_term.split(', ')
+  length_of_split = len(search_term_split)
 
-    if length_of_split == 2:
-      #seperate by the comma
-      search_term_city = search_term_split[0]
-      search_term_state = search_term_split[1]
-    else:
-      search_term_city = search_term
-      search_term_state = search_term
-
-    search_response = {}
-    search_response['count'] = 0
-    search_response['data'] = []
-
-    # below: search by incomplete name, or specific city, or specific state
-    actors_from_search = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city))))
-    actors_from_search_count = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city)))).count()
-
-    for actor in actors_from_search:
-      this_actor = {}
-      this_actor['id'] = actor.id
-      this_actor['name'] = actor.name
-      this_actor['num_upcoming_showings'] = Showing.query.filter_by(actor_id = Actor.id).count()
-
-      search_response['count'] = actors_from_search_count
-      search_response['data'].append(this_actor)
-
-    return render_template('pages/search_actors.html', results=search_response, search_term=search_term)
-  
+  if length_of_split == 2:
+    #seperate by the comma
+    search_term_city = search_term_split[0]
+    search_term_state = search_term_split[1]
   else:
-    abort(AuthError)
+    search_term_city = search_term
+    search_term_state = search_term
+
+  search_response = {}
+  search_response['count'] = 0
+  search_response['data'] = []
+
+  # below: search by incomplete name, or specific city, or specific state
+  actors_from_search = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city))))
+  actors_from_search_count = Actor.query.filter(or_(Actor.name.ilike(search_term_incomplete), and_(Actor.state.contains(search_term_state), Actor.city.contains(search_term_city)))).count()
+
+  for actor in actors_from_search:
+    this_actor = {}
+    this_actor['id'] = actor.id
+    this_actor['name'] = actor.name
+    this_actor['num_upcoming_showings'] = Showing.query.filter_by(actor_id = Actor.id).count()
+
+    search_response['count'] = actors_from_search_count
+    search_response['data'].append(this_actor)
+
+  return render_template('pages/search_actors.html', results=search_response, search_term=search_term)
+  
+  """ else:
+    abort(AuthError) """
 
 
 #  Delete ACTOR
@@ -420,99 +420,99 @@ def delete_actor(payload, actor_id):
 #  Show ALL MOVIES
 #  ----------------------------------------------------------------
 @app.route('/movies')
-@requires_auth('get:movies')
-def movies(payload):
-  if 'get:movies' in payload['permissions']:
+#@requires_auth('get:movies')
+def movies():
+  """ if 'get:movies' in payload['permissions']:
     print('**** payload /movies *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    try:
-      all_movies = Movie.query.all()
-      movie_data = []
+  try:
+    all_movies = Movie.query.all()
+    movie_data = []
 
-      for movie in all_movies:
-        movie_formatted = {}
-        movie_formatted['id'] = movie.id
-        movie_formatted['title'] = movie.title
-        movie_data.append(movie_formatted)
+    for movie in all_movies:
+      movie_formatted = {}
+      movie_formatted['id'] = movie.id
+      movie_formatted['title'] = movie.title
+      movie_data.append(movie_formatted)
 
-      return render_template('pages/movies.html', movies = movie_data)
-    
-    except Exception as e:
-      print(e)
-      abort(404)
+    return render_template('pages/movies.html', movies = movie_data)
   
-  else:
-    abort(AuthError)
+  except Exception as e:
+    print(e)
+    abort(404)
+  
+  """ else:
+    abort(AuthError) """
 
 
 #  Show ONE MOVIE
 #  ----------------------------------------------------------------
 @app.route('/movies/<int:movie_id>')
-@requires_auth('get:movies')
-def show_movie(payload, movie_id):
-  if 'get:movies' in payload['permissions']:
+#@requires_auth('get:movies')
+def show_movie(movie_id):
+  """ if 'get:movies' in payload['permissions']:
     print('**** payload /movies/ID *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    error = False
+  error = False
 
-    try:
-      movie_selected = Movie.query.get(movie_id)
-      showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
-      
-      if movie_selected is None:
-        flash('This Movie does NOT exist in our records.')
-        error = True
-        #confirm this on the browser
-      else: 
-        movie_selected_data = {}
-
-        movie_selected_data['id'] = movie_selected.id
-        movie_selected_data['title'] = movie_selected.title
-        movie_selected_data['release_date'] = movie_selected.release_date
-        movie_selected_data['genre'] = movie_selected.genre
-        movie_selected_data['website_link'] = movie_selected.website_link
-        movie_selected_data['instagram_link'] = movie_selected.instagram_link
-        movie_selected_data['image_link'] = movie_selected.image_link
-        movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
-        movie_selected_data['seeking_description'] = movie_selected.seeking_description
-        movie_selected_data['past_showings'] = []
-        movie_selected_data['upcoming_showings'] = []
-        movie_selected_data['past_showings_count'] = 0
-        movie_selected_data['upcoming_showings_count'] = 0
-
-        for showing in showings_joinedwith_actors:
-          this_showing = {}
-          this_showing['actor_id'] = showing.actor_id
-          this_showing['actor_name'] = showing.actor.name
-          this_showing['actor_image_link'] = showing.actor.image_link
-          this_showing['start_time'] = showing.start_time
-
-          showing_start_time = showing.start_time
-          showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
-          timestamp_db = datetime.timestamp(showing_start_time_formatted)
-          timestamp_current = time.time()
-
-          if timestamp_current > timestamp_db:
-            movie_selected_data['past_showings'].append(this_showing)
-            movie_selected_data['past_showings_count'] += 1
-          else:
-            movie_selected_data['upcoming_showings'].append(this_showing)
-            movie_selected_data['upcoming_showings_count'] += 1
-
-    except:
-      error = True
-      print(sys.exc_info())
-    if error:
-      error = False
-      flash('This Movie does NOT exist in our records.')
-      abort(404)
+  try:
+    movie_selected = Movie.query.get(movie_id)
+    showings_joinedwith_actors = Showing.query.filter_by(movie_id = movie_id).join(Actor).all()
     
-    return render_template('pages/show_movie.html', movie = movie_selected_data)
+    if movie_selected is None:
+      flash('This Movie does NOT exist in our records.')
+      error = True
+      #confirm this on the browser
+    else: 
+      movie_selected_data = {}
+
+      movie_selected_data['id'] = movie_selected.id
+      movie_selected_data['title'] = movie_selected.title
+      movie_selected_data['release_date'] = movie_selected.release_date
+      movie_selected_data['genre'] = movie_selected.genre
+      movie_selected_data['website_link'] = movie_selected.website_link
+      movie_selected_data['instagram_link'] = movie_selected.instagram_link
+      movie_selected_data['image_link'] = movie_selected.image_link
+      movie_selected_data['seeking_actors'] = movie_selected.seeking_actors
+      movie_selected_data['seeking_description'] = movie_selected.seeking_description
+      movie_selected_data['past_showings'] = []
+      movie_selected_data['upcoming_showings'] = []
+      movie_selected_data['past_showings_count'] = 0
+      movie_selected_data['upcoming_showings_count'] = 0
+
+      for showing in showings_joinedwith_actors:
+        this_showing = {}
+        this_showing['actor_id'] = showing.actor_id
+        this_showing['actor_name'] = showing.actor.name
+        this_showing['actor_image_link'] = showing.actor.image_link
+        this_showing['start_time'] = showing.start_time
+
+        showing_start_time = showing.start_time
+        showing_start_time_formatted = datetime.strptime(showing_start_time, '%Y-%m-%d %H:%M:%S')
+        timestamp_db = datetime.timestamp(showing_start_time_formatted)
+        timestamp_current = time.time()
+
+        if timestamp_current > timestamp_db:
+          movie_selected_data['past_showings'].append(this_showing)
+          movie_selected_data['past_showings_count'] += 1
+        else:
+          movie_selected_data['upcoming_showings'].append(this_showing)
+          movie_selected_data['upcoming_showings_count'] += 1
+
+  except:
+    error = True
+    print(sys.exc_info())
+  if error:
+    error = False
+    flash('This Movie does NOT exist in our records.')
+    abort(404)
   
-  else:
-    abort(AuthError)
+  return render_template('pages/show_movie.html', movie = movie_selected_data)
+  
+  """ else:
+    abort(AuthError) """
 
 
 #  Create MOVIE
@@ -671,36 +671,36 @@ def edit_movie_submission(payload, movie_id):
 #  Search MOVIE
 #  ----------------------------------------------------------------
 @app.route('/movies/search', methods=['POST'])
-@requires_auth('search:movies')
-def search_movies(payload):
-  if 'search:movies' in payload['permissions']:
+#@requires_auth('search:movies')
+def search_movies():
+  """ if 'search:movies' in payload['permissions']:
     print('**** payload /movies/search POST *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    search_term = request.form['search_term']
-    search_term_incomplete = '%' + search_term + '%'
+  search_term = request.form['search_term']
+  search_term_incomplete = '%' + search_term + '%'
 
-    search_response = {}
-    search_response['count'] = 0
-    search_response['data'] = []
+  search_response = {}
+  search_response['count'] = 0
+  search_response['data'] = []
 
-    # below: search by incomplete movie title or complete movie title
-    movies_from_search = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete)))
-    movies_from_search_count = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete))).count()
+  # below: search by incomplete movie title or complete movie title
+  movies_from_search = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete)))
+  movies_from_search_count = Movie.query.filter(or_(Movie.title.ilike(search_term_incomplete))).count()
 
-    for movie in movies_from_search:
-      this_movie = {}
-      this_movie['id'] = movie.id
-      this_movie['title'] = movie.title
-      this_movie['num_upcoming_showings'] = Showing.query.filter_by(movie_id = Movie.id).count()
+  for movie in movies_from_search:
+    this_movie = {}
+    this_movie['id'] = movie.id
+    this_movie['title'] = movie.title
+    this_movie['num_upcoming_showings'] = Showing.query.filter_by(movie_id = Movie.id).count()
 
-      search_response['count'] = movies_from_search_count
-      search_response['data'].append(this_movie)
+    search_response['count'] = movies_from_search_count
+    search_response['data'].append(this_movie)
 
-    return render_template('pages/search_movies.html', results=search_response, search_term=search_term)
+  return render_template('pages/search_movies.html', results=search_response, search_term=search_term)
   
-  else:
-    abort(AuthError)
+  """ else:
+    abort(AuthError) """
 
 
 #  Delete MOVIE
@@ -809,35 +809,35 @@ def create_showing_submission(payload):
 #  Show ALL SHOWINGS
 #  ----------------------------------------------------------------
 @app.route('/showings', methods=['GET'])
-@requires_auth('get:showings')
-def showings(payload):
-  if 'get:showings' in payload['permissions']:
+#@requires_auth('get:showings')
+def showings():
+  """ if 'get:showings' in payload['permissions']:
     print('**** payload deeeets /showings *****')
-    print(payload['permissions'])
+    print(payload['permissions']) """
 
-    showings = Showing.query.order_by(Showing.id).all()
+  showings = Showing.query.order_by(Showing.id).all()
 
-    all_showings = []
+  all_showings = []
 
-    for showing in showings:
-      this_showing = {}
-      movie_details = Movie.query.filter_by(id = showing.movie_id).one_or_none()
-      actor_details = Actor.query.filter_by(id = showing.actor_id).one_or_none()
+  for showing in showings:
+    this_showing = {}
+    movie_details = Movie.query.filter_by(id = showing.movie_id).one_or_none()
+    actor_details = Actor.query.filter_by(id = showing.actor_id).one_or_none()
 
-      this_showing['id'] = showing.id
-      this_showing['actor_id'] = showing.actor_id
-      this_showing['movie_id'] = showing.movie_id
-      this_showing['start_time'] = showing.start_time
-      this_showing['movie_title'] = movie_details.title
-      this_showing['actor_name'] = actor_details.name
-      this_showing['movie_image_link'] = movie_details.image_link
+    this_showing['id'] = showing.id
+    this_showing['actor_id'] = showing.actor_id
+    this_showing['movie_id'] = showing.movie_id
+    this_showing['start_time'] = showing.start_time
+    this_showing['movie_title'] = movie_details.title
+    this_showing['actor_name'] = actor_details.name
+    this_showing['movie_image_link'] = movie_details.image_link
 
-      all_showings.append(this_showing)
+    all_showings.append(this_showing)
 
-    return render_template('pages/showings.html', showings = all_showings)
+  return render_template('pages/showings.html', showings = all_showings)
   
-  else:
-    abort(AuthError)
+  """ else:
+    abort(AuthError) """
 
 
 

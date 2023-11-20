@@ -1,5 +1,5 @@
-## CAST! The Casting Agency App
-CAST! is the name of this Casting Agency Application. The Executive Producer at CAST! had a major painpoint; that it was very difficult to trace which movie is assigned to which starring actor (and vice versa) and which showings have been confirmed alongside their respective details. As the lead software engineer, my main motivation for creating CAST! was to create a system to simplify and streamline the process of showcasing and accessing the details of movies, starring actors, and showings.
+# CAST!
+CAST! streamlines the process of showcasing and accessing the details of cast actors, the movies they feature in and details of showings.
 
 ----------------------------------------------------------------------
 
@@ -26,14 +26,14 @@ CAST! is the name of this Casting Agency Application. The Executive Producer at 
 
 ### How to access CAST!
 - Public URL: https://castingagency-mjko-c1b260bbded2.herokuapp.com/
-- **NOTE:** Accessing CAST! beyond the home-page requires authentication. Feel free to sign-up on the screen that shows up, and relevant roles will be granted within 24 hours.
+- **NOTE:** Role-based access control has been applied on various CAST! functionality. The [general public](https://github.com/morangi2/CastingAgencyApp/blob/main/README.md#setting-up-role-based-access-control-with-auth0) can only view (actors, movies, showings) and search (actors and movies).
 
 ### CAST! V1
 This is what you currently experience in this app, which incoporates 4 major functionalities;
 1. Movies; posting a new movie, viewing a list of movies, viewing the details of a specific movie (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a specific movie, searching for a movie either by a partial name or full name.
 2. Actors; posting a new starring actor, viewing a list of starring actors grouped by geographical location, viewing the details of a specific actor (including past and upcoming showings and if they are seeking casting opportunities), editing and deleting a starring actor, searching for an actor by the state or city they reside in or by their partial or full name.
 3. Showings; posting a new showwing which highlights the movie that will be showed, alongside the starring actor, and the date and time of the showing.
-4. Search movies & actors; ***
+4. Search movies by full or partial titles & actors by name or location.
 
 ### CAST! V2
 This will be the 2nd iteration of the app adding onto the functionality above as illustrated below;
@@ -706,7 +706,7 @@ export CLIENT_SECRET_KEY='client secret key here'
 - For a detailed guide on how to set-up RBAC on your Flask/Python app on Auth0, [follow this official Auth0 guide.](https://developer.auth0.com/resources/code-samples/api/flask/basic-role-based-access-control)
 - There are 3 key roles featured with varying access levels as outlined below:
 
-| Casting Assistant | Casting Director | Executive Producer |
+| General Public | Casting Director | Executive Producer |
 | ----------------- | ---------------- | ------------------ |
 | get:actors   | get:actors     | get:actors    |
 | get:movies     | get:movies       | get:movies      |
@@ -726,6 +726,6 @@ export CLIENT_SECRET_KEY='client secret key here'
 
 ## Appreciation
 My hearfelt appreciation to:
-1. Udacity; for an amazing Web Developemnt Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
-2. My friends Ade, Warugz, and Soni; for the motivation to push through :)
+1. Udacity; for an amazing Web Developement Nanodegree program that gave me a platform to refresh my software engineering skills, and for providing the boiler-plate for this code-base.
+2. My friend Bayo; who steered me to this course as I pivot my career back into Software Engineering.
 
