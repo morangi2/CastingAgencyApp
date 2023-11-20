@@ -702,7 +702,6 @@ export CLIENT_SECRET_KEY='client secret key here'
 
 ## Setting up Role-Based Access Control with Auth0
 - Access of CAST! features is controlled via RBAC on Auth0.
-- The homepage is the only view that is not access-controlled.
 - For a detailed guide on how to set-up RBAC on your Flask/Python app on Auth0, [follow this official Auth0 guide.](https://developer.auth0.com/resources/code-samples/api/flask/basic-role-based-access-control)
 - There are 3 key roles featured with varying access levels as outlined below:
 
